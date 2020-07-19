@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>net.fhirfactory.pegacorn</groupId>
+        <artifactId>pegacorn-platform-petasos</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pegacorn-platform-petasos</relativePath>
+    </parent>
+        
+    <artifactId>pegacorn-platform-petasos-topology</artifactId>
+    <packaging>pom</packaging>
+    
+    <name>Pegacorn :: Platform :: Petasos :: Topology</name>
+    <description>The core (common) platform services on which Pegacorn is built</description>
+
+    <modules>
+        <module>../pegacorn-platform-petasos-topology-loader</module>
+        <module>../pegacorn-platform-petasos-topology-server</module>
+    </modules>
+</project>
