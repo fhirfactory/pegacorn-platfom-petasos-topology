@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MAHun
+ * Copyright (c) 2020 Mark A. Hunter (ACT Health)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import java.util.Map;
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyMode;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.DeploymentResilienceMode;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.resilienceMode;
 import net.fhirfactory.pegacorn.petasos.model.topology.*;
 import net.fhirfactory.pegacorn.petasos.topology.cache.TopologyDM;
 import org.slf4j.Logger;
@@ -47,8 +47,8 @@ public class TopologyIM {
     @Inject
     TopologyDM topologyDataManager;
 
-    @Inject
-    ElementNameExtensions nameExtensions;
+//    @Inject
+//    ElementNameExtensions nameExtensions;
 
     public void registerNode(NodeElement newElement) {
         LOG.debug(".registerNode(): Entry, newElement --> {}", newElement);
@@ -204,12 +204,12 @@ public class TopologyIM {
         return(ConcurrencyMode.CONCURRENCY_MODE_STANDALONE);
     }
 
-    public DeploymentResilienceMode getDeploymentResilienceMode(FDNToken nodeID){
+    public resilienceMode getDeploymentResilienceMode(FDNToken nodeID){
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
         if(nodeHierarchy.isEmpty()){
             LOG.debug(".getDeploymentResilienceMode(): Exit, node hierarchy is empty - returning default mode");
-            return(DeploymentResilienceMode.RESILIENCE_MODE_STANDALONE);
+            return(resilienceMode.RESILIENCE_MODE_STANDALONE);
         }
         int hierarchyHeight = nodeHierarchy.size();
         for(int counter = 0; counter < hierarchyHeight; counter++){
@@ -220,7 +220,7 @@ public class TopologyIM {
             }
         }
         LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return(DeploymentResilienceMode.RESILIENCE_MODE_STANDALONE);
+        return(resilienceMode.RESILIENCE_MODE_STANDALONE);
     }
 
 }

@@ -1,0 +1,308 @@
+{
+  "solutionNode" : {
+    "topologyElementType" : "SOLUTION",
+    "instanceName" : "ConfigSample",
+    "functionName" : "ConfigSample",
+    "endpoints" : [ ],
+    "containedElements" : [ {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "Comunicate",
+      "functionName" : "Comunicate",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "echo-communicate",
+        "functionName" : "echo-communicate",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "avbridge-communicate",
+        "functionName" : "avbridge-communicate",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "avconfsvr-communicate",
+        "functionName" : "avconfsvr-communicate",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "grpsvr-communicate",
+        "functionName" : "grpsvr-communicate",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "iris-communicate",
+        "functionName" : "iris-communicate",
+        "endpoints" : [ {
+          "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+          "endpointInstanceID" : "MatrixNotificationsReceiver",
+          "endpointFunctionID" : "MatrixNotificationsReceiver",
+          "friendlyName" : null,
+          "isServer" : true,
+          "requiresEncryption" : true,
+          "internalDNSEntry" : null,
+          "externalDNSEntry" : "gen0-iris",
+          "internalPortNumber" : "10700",
+          "externalPortNumber" : "DERIVED"
+        }, {
+          "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+          "endpointInstanceID" : "Petasos-TopologySyncSvr",
+          "endpointFunctionID" : "Petasos-TopologySyncSvr",
+          "friendlyName" : null,
+          "isServer" : true,
+          "requiresEncryption" : true,
+          "internalDNSEntry" : null,
+          "externalDNSEntry" : "petasos-gen0-iris",
+          "internalPortNumber" : "10870",
+          "externalPortNumber" : "DERIVED"
+        }, {
+          "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+          "endpointInstanceID" : "Petasos-ResilienceParcelSyncSvr",
+          "endpointFunctionID" : "Petasos-ResilienceParcelSyncSvr",
+          "friendlyName" : null,
+          "isServer" : true,
+          "requiresEncryption" : true,
+          "internalDNSEntry" : null,
+          "externalDNSEntry" : "petasos-gen0-iris",
+          "internalPortNumber" : "10872",
+          "externalPortNumber" : "DERIVED"
+        }, {
+          "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+          "endpointInstanceID" : "Petasos-HeartbeatSvr",
+          "endpointFunctionID" : "Petasos-HeartbeatSvr",
+          "friendlyName" : null,
+          "isServer" : true,
+          "requiresEncryption" : true,
+          "internalDNSEntry" : null,
+          "externalDNSEntry" : "petasos-gen0-iris",
+          "internalPortNumber" : "10871",
+          "externalPortNumber" : "DERIVED"
+        } ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE_MODULE",
+        "instanceName" : "MatrixNotificationBridge",
+        "functionName" : "MatrixNotificationBridge",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE_MODULE",
+        "instanceName" : "MatrixRoomManagement",
+        "functionName" : "MatrixRoomManagement",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "Hestia",
+      "functionName" : "Hestia",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SUBSYSTEM",
+        "instanceName" : "dam-hestia",
+        "functionName" : "dam-hestia",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SUBSYSTEM",
+        "instanceName" : "audit-hestia",
+        "functionName" : "audit-hestia",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "FHIRBreak",
+      "functionName" : "FHIRBreak",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-fhirbreak",
+        "functionName" : "gen0-fhirbreak",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen1-fhirbreak",
+        "functionName" : "gen1-fhirbreak",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "FHIRView",
+      "functionName" : "FHIRView",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-fhirview",
+        "functionName" : "gen0-fhirview",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen1-fhirview",
+        "functionName" : "gen1-fhirview",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "FHIRPlace",
+      "functionName" : "FHIRPlace",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-fhirplace",
+        "functionName" : "gen0-fhirplace",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "FHIRPit",
+      "functionName" : "FHIRPit",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-fhirbreak",
+        "functionName" : "gen0-fhirbreak",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen1-fhirbreak",
+        "functionName" : "gen1-fhirbreak",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "Ladon",
+      "functionName" : "Ladon",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-fhirplace",
+        "functionName" : "gen0-fhirplace",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "MITaF",
+      "functionName" : "MITaF",
+      "endpoints" : [ ],
+      "containedElements" : [ {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen0-mitaf",
+        "functionName" : "gen0-mitaf",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      }, {
+        "topologyElementType" : "SERVICE",
+        "instanceName" : "gen1-mitaf",
+        "functionName" : "gen1-mitaf",
+        "endpoints" : [ ],
+        "containedElements" : [ ],
+        "elementVersion" : "0.0.1",
+        "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+        "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+      } ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    }, {
+      "topologyElementType" : "SUBSYSTEM",
+      "instanceName" : "ITOps",
+      "functionName" : "ITOps",
+      "endpoints" : [ ],
+      "containedElements" : [ ],
+      "elementVersion" : "0.0.1",
+      "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+      "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+    } ],
+    "elementVersion" : "0.0.1",
+    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+  }
+}

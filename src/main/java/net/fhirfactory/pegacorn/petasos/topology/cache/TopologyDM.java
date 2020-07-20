@@ -31,17 +31,17 @@ import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.enterprise.context.ApplicationScoped;
 
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.RDN;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
 
-@Singleton
+@ApplicationScoped
 public class TopologyDM {
 
     private static final Logger LOG = LoggerFactory.getLogger(TopologyDM.class);

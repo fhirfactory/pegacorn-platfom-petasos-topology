@@ -23,7 +23,7 @@ package net.fhirfactory.pegacorn.petasos.topology.properties;
 
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.RDN;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.DeploymentResilienceMode;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.resilienceMode;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -42,8 +42,8 @@ public class ServiceModuleProperties {
     @Inject
     TopologyIM deploymentTopology;
 
-    public DeploymentResilienceMode getDeploymentMode() {
-        return (DeploymentResilienceMode.RESILIENCE_MODE_STANDALONE);
+    public resilienceMode getDeploymentMode() {
+        return (resilienceMode.RESILIENCE_MODE_STANDALONE);
     }
 
     public ConcurrencyMode getWUAConcurrencyMode() {
