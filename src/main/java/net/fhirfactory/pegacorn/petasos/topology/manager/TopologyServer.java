@@ -23,7 +23,6 @@ package net.fhirfactory.pegacorn.petasos.topology.manager;
 
 import javax.inject.Inject;
 import net.fhirfactory.pegacorn.petasos.topology.loader.TopologyFileReader;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +41,7 @@ public class TopologyServer extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         from("timer://TopologyServerTrigger?delay=2000&period=0")
+                .routeId("Topology Configuration File Loader")
                 .bean(initialLoader)
                 .end();
     }

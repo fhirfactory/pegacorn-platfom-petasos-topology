@@ -22,23 +22,24 @@
 package net.fhirfactory.pegacorn.petasos.topology.manager;
 
 import java.util.Map;
-import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.FDNToken;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyMode;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.resilienceMode;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.topology.*;
 import net.fhirfactory.pegacorn.petasos.topology.cache.TopologyDM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Set;
+import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
 /**
  * This class WILL do more in the future, but it is for now just a proxy to the
  * TopologyDM.
  */
+
 @ApplicationScoped
 public class TopologyIM {
 
@@ -50,67 +51,28 @@ public class TopologyIM {
 //    @Inject
 //    ElementNameExtensions nameExtensions;
 
-    public void registerNode(NodeElement newElement) {
-        LOG.debug(".registerNode(): Entry, newElement --> {}", newElement);
-        topologyDataManager.addNode(newElement);
-        if (newElement.getContainingElementID() != null) {
-            addContainedNodeToNode(newElement.getContainingElementID(), newElement);
+    @Transactional
+    public void registerNode(NodeElement newNodeElement) {
+        LOG.debug(".registerNode(): Entry, newElement --> {}", newNodeElement);
+        topologyDataManager.addNode(newNodeElement);
+        if (newNodeElement.getContainingElementID() != null) {
+            addContainedNodeToNode(newNodeElement.getContainingElementID(), newNodeElement);
         }
     }
 
-    public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNodeID) {
+    @Transactional
+    public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNode) {
+        LOG.debug(".addContainedNodeToNode(), nodeID --> {}, containedNode --> {}", nodeID, containedNode);
         NodeElement containingElement = getNode(nodeID);
         if (containingElement != null) {
-            containingElement.addContainedElement(containedNodeID.getElementInstanceID());
+            LOG.trace(".addContainedNodeToNode(): Containing Node exists, so add contained node!");
+            containingElement.addContainedElement(containedNode.getElementInstanceID());
         } else {
-            NodeElement newContainingElement = new NodeElement();
-            FDN containedElementTypeFDN = new FDN(containedNodeID.getElementFunctionTypeID());
-            FDN newContainingElementTypeFDN = containedElementTypeFDN.getParentFDN();
-            newContainingElement.setElementFunctionTypeID(newContainingElementTypeFDN.getToken());
-            newContainingElement.setElementInstanceID(nodeID);
-            newContainingElement.setElementVersion(containedNodeID.getElementVersion());
-            newContainingElement.addContainedElement(containedNodeID.getElementInstanceID());
-            FDN newContainingElementFDN = new FDN(nodeID);
-            if (newContainingElementFDN.getRDNCount() > 1) {
-                FDN newContainingContainingElementFDN = new FDN(nodeID).getParentFDN();
-                newContainingElement.setContainingElementID(newContainingContainingElementFDN.getToken());
-            }
-            switch (containedNodeID.getTopologyElementType()) {
-                case WUP_INSTANCE:
-                case WUP_FUNCTION:
-                case WUP_INTERCHANGE_PAYLOAD_TRANSFORMER:
-                case WUP_INTERCHANGE_ROUTER:
-                case WUP_CONTAINER_INGRES_PROCESSOR:
-                case WUP_CONTAINER_INGRES_GATEKEEPER:
-                case WUP_CONTAINER_INGRES_CONDUIT:
-                case WUP_CONTAINER_EGRESS_CONDUIT:
-                case WUP_CONTAINER_EGRESS_PROCESSOR:
-                case WUP_CONTAINER_EGRESS_GATEKEEPER:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.PROCESSING_PLANT);
-                    break;
-                case PROCESSING_PLANT:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.SERVICE_MODULE);
-                    break;
-                case SERVICE_MODULE:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.APPLICATION_SERVER);
-                    break;
-                case APPLICATION_SERVER:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.SITE);
-                    break;
-                case SITE:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.SERVICE);
-                    break;
-                case SERVICE:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.SUBSYSTEM);
-                    break;
-                case SUBSYSTEM:
-                default:
-                    containedNodeID.setTopologyElementType(NodeElementInstanceTypeEnum.SOLUTION);
-            }
-            registerNode(newContainingElement);
+            LOG.trace(".addContainedNodeToNode(): Containing Node doesn't exist, so the containedNode is actually the Top node!");
         }
     }
 
+    @Transactional
     public void unregisterNode(FDNToken elementID) {
         LOG.debug(".unregisterNode(): Entry, elementID --> {}", elementID);
         topologyDataManager.removeNode(elementID);
@@ -123,14 +85,18 @@ public class TopologyIM {
 
     public NodeElement getNode(FDNToken nodeID) {
         LOG.debug(".getNode(): Entry, nodeID --> {}", nodeID);
-        return (topologyDataManager.getNode(nodeID));
+        NodeElement retrievedNode = topologyDataManager.getNode(nodeID);
+        LOG.debug(".getNode(): Exit, retrievedNode --> {}", retrievedNode);
+        return (retrievedNode);
     }
 
+    @Transactional
     public void registerLink(LinkElement newLink) {
         LOG.debug(".registerLink(): Entry, newLink --> {}", newLink);
         topologyDataManager.addLink(newLink);
     }
 
+    @Transactional
     public void unregisterLink(FDNToken linkID) {
         LOG.debug(".unregisterLink(): Entry, linkID --> {}", linkID);
         topologyDataManager.removeLink(linkID);
@@ -146,11 +112,13 @@ public class TopologyIM {
         return (topologyDataManager.getLink(linkID));
     }
 
+    @Transactional
     public void registerEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".registerLink(): Entry, newEndpoint --> {}", newEndpoint);
         topologyDataManager.addEndpoint(newEndpoint);
     }
 
+    @Transactional
     public void unregisterEndpoint(FDNToken endpointID) {
         LOG.debug(".unregisterLink(): Entry, endpointID --> {}", endpointID);
         topologyDataManager.removeEndpoint(endpointID);
@@ -168,29 +136,23 @@ public class TopologyIM {
 
 
     // Business Methods
-    public FDNToken getServiceModuleContext(String serviceModuleTypeName) {
-        Map<Integer, FDNToken> matchingIDs = topologyDataManager.findMatchingNode(serviceModuleTypeName);
-        if (matchingIDs.isEmpty()) {
-            return (null);
-        }
-        if (matchingIDs.size() > 1) {
-            /* return(null) */ // Being Brave....
-        }
-        FDNToken moduleContext = matchingIDs.get(0);
-        return (moduleContext);
+    public Map<Integer, FDNToken> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
+        LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Entry, serviceModuleInstanceName --> {} ", serviceModuleInstanceName);
+        Map<Integer, FDNToken> matchingIDs = topologyDataManager.findNodesWithMatchingUnqualifiedInstanceName(serviceModuleInstanceName);
+        return (matchingIDs);
     }
-
+    
     public FDNToken getSolutionID() {
         FDNToken solutionID = topologyDataManager.getSolutionID();
         return (solutionID);
     }
 
-    public ConcurrencyMode getConcurrencyMode(FDNToken nodeID){
+    public ConcurrencyModeEnum getConcurrencyMode(FDNToken nodeID){
         LOG.debug(".getConcurrencyMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
         if(nodeHierarchy.isEmpty()){
             LOG.debug(".getConcurrencyMode(): Exit, node hierarchy is empty - returning default mode");
-            return(ConcurrencyMode.CONCURRENCY_MODE_STANDALONE);
+            return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
         }
         int hierarchyHeight = nodeHierarchy.size();
         for(int counter = 0; counter < hierarchyHeight; counter++){
@@ -201,15 +163,15 @@ public class TopologyIM {
             }
         }
         LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return(ConcurrencyMode.CONCURRENCY_MODE_STANDALONE);
+        return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
     }
 
-    public resilienceMode getDeploymentResilienceMode(FDNToken nodeID){
+    public ResilienceModeEnum getDeploymentResilienceMode(FDNToken nodeID){
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
         if(nodeHierarchy.isEmpty()){
             LOG.debug(".getDeploymentResilienceMode(): Exit, node hierarchy is empty - returning default mode");
-            return(resilienceMode.RESILIENCE_MODE_STANDALONE);
+            return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
         }
         int hierarchyHeight = nodeHierarchy.size();
         for(int counter = 0; counter < hierarchyHeight; counter++){
@@ -220,7 +182,7 @@ public class TopologyIM {
             }
         }
         LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return(resilienceMode.RESILIENCE_MODE_STANDALONE);
+        return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
     }
 
 }

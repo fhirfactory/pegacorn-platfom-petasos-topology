@@ -21,8 +21,6 @@
  */
 package net.fhirfactory.pegacorn.petasos.topology.loader.model;
 
-import net.fhirfactory.pegacorn.petasos.topology.loader.model.ConfigMapNodeElement;
-
 /**
  *
  * @author Mark A. Hunter

@@ -23,8 +23,8 @@ package net.fhirfactory.pegacorn.petasos.topology.loader.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyMode;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.resilienceMode;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
 import org.slf4j.Logger;
@@ -44,8 +44,8 @@ public class ConfigMapNodeElement {
     private List<ConfigMapEndpointElement> endpoints;
     private List<ConfigMapNodeElement> containedElements;
     private String elementVersion;
-    private resilienceMode resilienceMode;
-    private ConcurrencyMode concurrencyMode;
+    private ResilienceModeEnum resilienceMode;
+    private ConcurrencyModeEnum concurrencyMode;
     
     public ConfigMapNodeElement(){
         endpoints = new ArrayList<ConfigMapEndpointElement>();
@@ -101,19 +101,19 @@ public class ConfigMapNodeElement {
         this.elementVersion = elementVersion;
     }
 
-    public resilienceMode getResilienceMode() {
+    public ResilienceModeEnum getResilienceMode() {
         return resilienceMode;
     }
 
-    public void setResilienceMode(resilienceMode resilienceMode) {
+    public void setResilienceMode(ResilienceModeEnum resilienceMode) {
         this.resilienceMode = resilienceMode;
     }
 
-    public ConcurrencyMode getConcurrencyMode() {
+    public ConcurrencyModeEnum getConcurrencyMode() {
         return concurrencyMode;
     }
 
-    public void setConcurrencyMode(ConcurrencyMode concurrencyMode) {
+    public void setConcurrencyMode(ConcurrencyModeEnum concurrencyMode) {
         this.concurrencyMode = concurrencyMode;
     }
 

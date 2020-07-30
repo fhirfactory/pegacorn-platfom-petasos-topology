@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MAHun
+ * Copyright (c) 2020 Mark A. Hunter (ACT Health)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,11 +36,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.RDN;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
 
+
+/**
+ * 
+ * @author Mark A. Hunter
+ * @since 2020-07-01
+ * 
+ */
 @ApplicationScoped
 public class TopologyDM {
 
@@ -74,6 +82,7 @@ public class TopologyDM {
      *
      * @param newElement The NodeElement to be added to the Set
      */
+    @Transactional
     public void addNode(NodeElement newElement) {
         LOG.debug(".addNode(): Entry, newElement --> {}", newElement);
         if (newElement == null) {
@@ -89,6 +98,7 @@ public class TopologyDM {
         }
     }
 
+    @Transactional
     public void removeNode(FDNToken elementID) {
         LOG.debug(".removeNode(): Entry, elementID --> {}", elementID);
         if (elementID == null) {
@@ -135,6 +145,7 @@ public class TopologyDM {
         }
     }
 
+    @Transactional
     public void addLink(LinkElement newLink) {
         LOG.debug(".addLink(): Entry, newLink --> {}", newLink);
         if (newLink == null) {
@@ -150,6 +161,7 @@ public class TopologyDM {
         }
     }
 
+    @Transactional
     public void removeLink(FDNToken linkID) {
         LOG.debug(".removeLink(): Entry, linkID --> {}", linkID);
         if (linkID == null) {
@@ -164,6 +176,7 @@ public class TopologyDM {
         LOG.debug(".removeLink(): Exit");
     }
 
+    @Transactional
     public Set<LinkElement> getLinkSet() {
         LOG.debug(".getLinkSet(): Entry");
         LinkedHashSet<LinkElement> linkSet = new LinkedHashSet<LinkElement>();
@@ -196,6 +209,7 @@ public class TopologyDM {
         }
     }
 
+    @Transactional
     public void addEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".addEndpoint(): Entry, newEndpoint --> {}", newEndpoint);
         if (newEndpoint == null) {
@@ -205,12 +219,15 @@ public class TopologyDM {
             throw (new IllegalArgumentException(".addLink(): bad Route Token within newEndpoint"));
         }
         if (this.endpointSet.containsKey(newEndpoint.getEndpointInstanceID())) {
+            LOG.trace(".addEndpoint(): Replacing Existing Endpoint in Cache");
             this.endpointSet.replace(newEndpoint.getEndpointInstanceID(), newEndpoint);
         } else {
+            LOG.trace(".addEndpoint(): Adding Endpoint to Cache");
             this.endpointSet.put(newEndpoint.getEndpointInstanceID(), newEndpoint);
         }
     }
 
+    @Transactional
     public void removeEndpoint(FDNToken endpointID) {
         LOG.debug(".removeEndpoint(): Entry, endpointID --> {}", endpointID);
         if (endpointID == null) {
@@ -225,6 +242,7 @@ public class TopologyDM {
         LOG.debug(".removeEndpoint(): Exit");
     }
 
+    @Transactional
     public Set<EndpointElement> getEndpointSet() {
         LOG.debug(".getEndpointSet(): Entry");
         LinkedHashSet<EndpointElement> endpoints = new LinkedHashSet<EndpointElement>();
@@ -257,7 +275,7 @@ public class TopologyDM {
         }
     }
 
-    public Map<Integer, FDNToken> findMatchingNode(String unqualifiedRDNName) {
+    public Map<Integer, FDNToken> findNodesWithMatchingUnqualifiedInstanceName(String unqualifiedRDNName) {
         LOG.debug(".findMatchingNode(): Entry, unqualifiedRDNName --> {}", unqualifiedRDNName);
         HashMap<Integer, FDNToken> matchingSet = new HashMap<Integer, FDNToken>();
         Enumeration<FDNToken> elementIDEnumerator = nodeSet.keys();

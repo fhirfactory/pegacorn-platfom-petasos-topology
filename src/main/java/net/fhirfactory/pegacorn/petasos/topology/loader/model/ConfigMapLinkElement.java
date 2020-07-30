@@ -22,8 +22,6 @@
 package net.fhirfactory.pegacorn.petasos.topology.loader.model;
 
 import java.util.List;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyMode;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.resilienceMode;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
 
 /**
