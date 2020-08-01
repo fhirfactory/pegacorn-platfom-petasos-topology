@@ -48,9 +48,6 @@ public class TopologyIM {
     @Inject
     TopologyDM topologyDataManager;
 
-//    @Inject
-//    ElementNameExtensions nameExtensions;
-
     @Transactional
     public void registerNode(NodeElement newNodeElement) {
         LOG.debug(".registerNode(): Entry, newElement --> {}", newNodeElement);
@@ -132,6 +129,14 @@ public class TopologyIM {
     public EndpointElement getEndpoint(FDNToken endpointID) {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
         return (topologyDataManager.getEndpoint(endpointID));
+    }
+    
+    @Transactional
+    public void setInstanceInPlace(FDNToken nodeID, boolean instantionState){
+        LOG.debug(".setInstanceInPlace(): Entry, nodeID --> {}, instantiationState --> {}", nodeID, instantionState);
+        NodeElement retrievedNode = topologyDataManager.getNode(nodeID);
+        retrievedNode.setInstanceInPlace(instantionState);
+        LOG.debug(".setInstanceInPlace(): Exit");
     }
 
 

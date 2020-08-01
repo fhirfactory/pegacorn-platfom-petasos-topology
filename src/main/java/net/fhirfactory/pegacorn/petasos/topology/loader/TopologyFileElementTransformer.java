@@ -86,7 +86,7 @@ public class TopologyFileElementTransformer {
                 }
             }
         }
-        newNode.setElementVersion(incomingNodeDetail.getElementVersion());
+        newNode.setVersion(incomingNodeDetail.getElementVersion());
         LOG.trace(".convertToNodeElement(): Calling on Topology Manager to add Node to Topology Cache, parentNodeInstanceID --> {}, newNode --> {}", parentNodeInstanceID, newNode);
         topologyInformationManager.registerNode(newNode);
         LOG.trace(".convertToNodeElement(): Adding the contained Node IDs to the Topology Element");

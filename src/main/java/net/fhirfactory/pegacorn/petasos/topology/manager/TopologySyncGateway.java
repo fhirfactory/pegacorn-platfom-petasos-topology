@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mark A. Hunter
  */
-public class TopologyServer extends RouteBuilder {
+public class TopologySyncGateway extends RouteBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TopologyServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopologySyncGateway.class);
     
     @Inject
     TopologyFileReader initialLoader;
