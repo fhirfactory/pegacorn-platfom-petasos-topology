@@ -26,7 +26,7 @@ import java.util.List;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class ConfigMapNodeElement {
         private static final Logger LOG = LoggerFactory.getLogger(NodeElement.class);
 
-    private NodeElementInstanceTypeEnum topologyElementType;
+    private NodeElementTypeEnum topologyElementType;
     private String instanceName;
     private String functionName;
     private List<ConfigMapLinkElement> links;
@@ -53,11 +53,11 @@ public class ConfigMapNodeElement {
         links = new ArrayList<ConfigMapLinkElement>();
     }
 
-    public NodeElementInstanceTypeEnum getTopologyElementType() {
+    public NodeElementTypeEnum getTopologyElementType() {
         return topologyElementType;
     }
 
-    public void setTopologyElementType(NodeElementInstanceTypeEnum topologyElementType) {
+    public void setTopologyElementType(NodeElementTypeEnum topologyElementType) {
         this.topologyElementType = topologyElementType;
     }
 

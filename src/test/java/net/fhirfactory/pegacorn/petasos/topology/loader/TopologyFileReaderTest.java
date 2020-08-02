@@ -71,7 +71,7 @@ public class TopologyFileReaderTest {
         Iterator<NodeElement> nodeSetIterator = nodeSet.iterator();
         while (nodeSetIterator.hasNext()) {
             NodeElement currentNode = nodeSetIterator.next();
-            LOG.trace(".readFile(): Node Instance ID--> {}", currentNode.getElementInstanceID());
+            LOG.trace(".readFile(): Node Instance ID--> {}", currentNode.getNodeInstanceID());
         }
     }
 }

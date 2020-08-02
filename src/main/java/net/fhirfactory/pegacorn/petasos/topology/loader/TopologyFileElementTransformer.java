@@ -57,8 +57,8 @@ public class TopologyFileElementTransformer {
         newNode.setConcurrencyMode(incomingNodeDetail.getConcurrencyMode());
         LOG.trace(".convertToNodeElement(): Adding the ResilienceMode to the new NodeElement, resilience mode --> {}", incomingNodeDetail.getResilienceMode().getResilienceMode());
         newNode.setResilienceMode(incomingNodeDetail.getResilienceMode());
-        LOG.trace(".convertToNodeElement(): Adding the ElementType to the new NodeElement, type name --> {}", incomingNodeDetail.getTopologyElementType().getMapElementType());
-        newNode.setTopologyElementType(incomingNodeDetail.getTopologyElementType());
+        LOG.trace(".convertToNodeElement(): Adding the ElementType to the new NodeElement, type name --> {}", incomingNodeDetail.getTopologyElementType().getNodeElementType());
+        newNode.setNodeArchetype(incomingNodeDetail.getTopologyElementType());
         LOG.trace(".convertToNodeElement(): Adding the InstanceID to the new NodeElement, instance name --> {}", incomingNodeDetail.getInstanceName());
         FDN newNodeInstanceID;
         if (parentNodeInstanceID == null) {
@@ -66,23 +66,23 @@ public class TopologyFileElementTransformer {
         } else {
             newNodeInstanceID = new FDN(parentNodeInstanceID);
         }
-        newNodeInstanceID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getMapElementType(), incomingNodeDetail.getInstanceName()));
-        newNode.setElementInstanceID(newNodeInstanceID.getToken());
+        newNodeInstanceID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getNodeElementType(), incomingNodeDetail.getInstanceName()));
+        newNode.setNodeInstanceID(newNodeInstanceID.getToken());
         LOG.trace(".convertToNodeElement(): Adding the FunctionID to the new NodeElement, function name --> {}", incomingNodeDetail.getFunctionName());
         FDN newNodeFunctionID;
         if (parentNodeFunctionID == null) {
             LOG.trace(".convertToNodeElement(): parentNodeFunctionID is NULL, so we make ourselves the top!");
             newNodeFunctionID = new FDN();
-            newNodeFunctionID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getMapElementType(), incomingNodeDetail.getFunctionName()));
-            newNode.setElementFunctionTypeID(newNodeFunctionID.getToken());
+            newNodeFunctionID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getNodeElementType(), incomingNodeDetail.getFunctionName()));
+            newNode.setNodeFunctionID(newNodeFunctionID.getToken());
         } else {
             newNodeFunctionID = new FDN(parentNodeFunctionID);
             if (incomingNodeDetail.getFunctionName() == null) {
-                newNode.setElementFunctionTypeID(newNodeFunctionID.getToken());
+                newNode.setNodeFunctionID(newNodeFunctionID.getToken());
             } else {
                 if (!newNodeFunctionID.getUnqualifiedRDN().getNameValue().contentEquals(incomingNodeDetail.getFunctionName())) {
-                    newNodeFunctionID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getMapElementType(), incomingNodeDetail.getFunctionName()));
-                    newNode.setElementFunctionTypeID(newNodeFunctionID.getToken());
+                    newNodeFunctionID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getNodeElementType(), incomingNodeDetail.getFunctionName()));
+                    newNode.setNodeFunctionID(newNodeFunctionID.getToken());
                 }
             }
         }
@@ -97,9 +97,9 @@ public class TopologyFileElementTransformer {
                 ConfigMapNodeElement containedNode = nodeElementIterator.next();
                 LOG.trace("convertToNodeElement(): Adding the contained Node ID --> {}", containedNode.getInstanceName());
                 FDN containedNodeFDN = new FDN(newNodeInstanceID);
-                containedNodeFDN.appendRDN(new RDN(containedNode.getTopologyElementType().getMapElementType(), containedNode.getInstanceName()));
+                containedNodeFDN.appendRDN(new RDN(containedNode.getTopologyElementType().getNodeElementType(), containedNode.getInstanceName()));
                 newNode.addContainedElement(containedNodeFDN.getToken());
-                if (newNode.getElementFunctionTypeID() == null) {
+                if (newNode.getNodeFunctionID() == null) {
                     convertToNodeElement(containedNode, newNodeInstanceID.getToken(), parentNodeFunctionID);
                 } else {
                     convertToNodeElement(containedNode, newNodeInstanceID.getToken(), newNodeFunctionID.getToken());

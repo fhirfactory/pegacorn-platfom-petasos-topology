@@ -63,7 +63,7 @@ public class TopologyIM {
         NodeElement containingElement = getNode(nodeID);
         if (containingElement != null) {
             LOG.trace(".addContainedNodeToNode(): Containing Node exists, so add contained node!");
-            containingElement.addContainedElement(containedNode.getElementInstanceID());
+            containingElement.addContainedElement(containedNode.getNodeInstanceID());
         } else {
             LOG.trace(".addContainedNodeToNode(): Containing Node doesn't exist, so the containedNode is actually the Top node!");
         }

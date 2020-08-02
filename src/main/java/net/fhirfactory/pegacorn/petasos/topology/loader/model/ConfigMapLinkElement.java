@@ -22,25 +22,25 @@
 package net.fhirfactory.pegacorn.petasos.topology.loader.model;
 
 import java.util.List;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
 
 /**
  *
  * @author Mark A. Hunter
  */
 public class ConfigMapLinkElement {
-    private NodeElementInstanceTypeEnum topologyElementType;
+    private NodeElementTypeEnum topologyElementType;
     private String instanceName;
     private String functionName;
     private List<String> linkedEndpoints;
     private String linkType;
     private String elementVersion;
 
-    public NodeElementInstanceTypeEnum getTopologyElementType() {
+    public NodeElementTypeEnum getTopologyElementType() {
         return topologyElementType;
     }
 
-    public void setTopologyElementType(NodeElementInstanceTypeEnum topologyElementType) {
+    public void setTopologyElementType(NodeElementTypeEnum topologyElementType) {
         this.topologyElementType = topologyElementType;
     }
 

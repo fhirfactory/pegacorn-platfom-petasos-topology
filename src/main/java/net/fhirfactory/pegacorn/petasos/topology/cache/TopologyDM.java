@@ -40,7 +40,7 @@ import javax.transaction.Transactional;
 
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.RDN;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementInstanceTypeEnum;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
 
 
 /**
@@ -77,8 +77,8 @@ public class TopologyDM {
     /**
      * This function adds an entry to the Element Set.
      * <p>
-     * Note that the default behaviour is to UPDATE the values with the set if
-     * there already exists an instance for the specified FDNToken (identifier).
+ Note that the default behaviour is to UPDATE the values with the set if
+ there already exists an instance for the specified FDNToken (identifier).
      *
      * @param newElement The NodeElement to be added to the Set
      */
@@ -88,13 +88,13 @@ public class TopologyDM {
         if (newElement == null) {
             throw (new IllegalArgumentException(".addNode(): newElement is null"));
         }
-        if (newElement.getElementInstanceID() == null) {
+        if (newElement.getNodeInstanceID() == null) {
             throw (new IllegalArgumentException(".addNode(): bad elementID within newElement"));
         }
-        if (this.nodeSet.containsKey(newElement.getElementInstanceID())) {
-            this.nodeSet.replace(newElement.getElementInstanceID(), newElement);
+        if (this.nodeSet.containsKey(newElement.getNodeInstanceID())) {
+            this.nodeSet.replace(newElement.getNodeInstanceID(), newElement);
         } else {
-            this.nodeSet.put(newElement.getElementInstanceID(), newElement);
+            this.nodeSet.put(newElement.getNodeInstanceID(), newElement);
         }
     }
 
@@ -300,7 +300,7 @@ public class TopologyDM {
             FDNToken currentElementId = elementIDEnumerator.nextElement();
             FDN currentElementFDN = new FDN(currentElementId);
             RDN currentElementUnqualifiedRDN = currentElementFDN.getUnqualifiedRDN();
-            if (currentElementUnqualifiedRDN.getNameQualifier().contentEquals(NodeElementInstanceTypeEnum.SOLUTION.getMapElementType())) {
+            if (currentElementUnqualifiedRDN.getNameQualifier().contentEquals(NodeElementTypeEnum.SOLUTION.getNodeElementType())) {
                 return (currentElementId);
             }
         }
