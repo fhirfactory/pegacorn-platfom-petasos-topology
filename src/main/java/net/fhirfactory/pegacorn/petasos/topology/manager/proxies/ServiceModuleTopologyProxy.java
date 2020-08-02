@@ -34,6 +34,7 @@ import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnu
 import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
 import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementFunctionToken;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
 import net.fhirfactory.pegacorn.petasos.topology.manager.TopologyIM;
 import org.slf4j.Logger;
@@ -131,20 +132,24 @@ public class ServiceModuleTopologyProxy {
         return (instanceID);
     }
 
-    public FDNToken getServiceModuleFunctionID(FDNToken serviceModuleID) {
+    public NodeElementFunctionToken getServiceModuleFunctionToken(FDNToken serviceModuleID) {
         LOG.debug(".getServiceModuleFunctionID(): Entry, serviceModuleID --> {}", serviceModuleID);
         NodeElement node = topologyManager.getNode(serviceModuleID);
-        FDNToken functionID = node.getNodeFunctionID();
-        LOG.debug(".getServiceModuleFunctionID(): Exit, functionID --> {}", functionID);
-        return (functionID);
+        NodeElementFunctionToken functionToken = new NodeElementFunctionToken();
+        functionToken.setFunctionID(node.getNodeFunctionID());
+        functionToken.setVersion(node.getVersion());
+        LOG.debug(".getServiceModuleFunctionID(): Exit, functionToken --> {}", functionToken);
+        return (functionToken);
     }
 
-    public FDNToken getWUPFunctionID(FDNToken wupID) {
+    public NodeElementFunctionToken getWUPFunctionToken(FDNToken wupID) {
         LOG.debug(".getWUPFunctionID(): Entry, wupID --> {}", wupID);
         NodeElement node = topologyManager.getNode(wupID);
-        FDNToken functionID = node.getNodeFunctionID();
-        LOG.debug(".getWUPFunctionID(): Exit, functionID --> {}", functionID);
-        return (functionID);
+        NodeElementFunctionToken functionToken = new NodeElementFunctionToken();
+        functionToken.setFunctionID(node.getNodeFunctionID());
+        functionToken.setVersion(node.getVersion());
+        LOG.debug(".getWUPFunctionID(): Exit, functionToken --> {}", functionToken);
+        return (functionToken);
     }
 
     public Integer getWorkUnitActivityRetryLimit() {
