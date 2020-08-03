@@ -69,7 +69,7 @@
             "functionName" : "iris-communicate",
             "links" : [ ],
             "endpoints" : [ {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "INGRES_MESSAGING",
               "endpointInstanceID" : "MatrixNotificationsReceiver",
               "endpointFunctionID" : "MatrixNotificationsReceiver",
               "friendlyName" : null,
@@ -80,7 +80,7 @@
               "internalPortNumber" : "10700",
               "externalPortNumber" : "10700"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosTopologySyncSvr",
               "endpointFunctionID" : "PetasosTopologySyncSvr",
               "friendlyName" : null,
@@ -91,7 +91,7 @@
               "internalPortNumber" : "10870",
               "externalPortNumber" : "10870"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosResilienceParcelSyncSvr",
               "endpointFunctionID" : "PetasosResilienceParcelSyncSvr",
               "friendlyName" : null,
@@ -102,7 +102,7 @@
               "internalPortNumber" : "10872",
               "externalPortNumber" : "10872"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosHeartbeatSvr",
               "endpointFunctionID" : "PetasosHeartbeatSvr",
               "friendlyName" : null,
@@ -121,53 +121,133 @@
               "endpoints" : [ ],
               "containedElements" : [ {
                 "topologyElementType" : "SERVICE_MODULE",
-                "instanceName" : "MatrixNotificationReceiver",
-                "functionName" : "MatrixNotificationReceiver",
-                "links" : [ ],
-                "endpoints" : [ {
-                  "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
-                  "endpointInstanceID" : "MatrixNotificationReceiver",
-                  "endpointFunctionID" : "MatrixNotificationReceiver",
-                  "friendlyName" : null,
-                  "isServer" : true,
-                  "requiresEncryption" : true,
-                  "internalDNSEntry" : null,
-                  "externalDNSEntry" : "Inherited",
-                  "internalPortNumber" : null,
-                  "externalPortNumber" : "10700"
-                } ],
-                "containedElements" : [ ],
-                "elementVersion" : "0.0.1",
-                "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
-                "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
-              }, {
-                "topologyElementType" : "SERVICE_MODULE",
-                "instanceName" : "CommunicateIrisEdgeForward",
-                "functionName" : "CommunicateIrisEdgeForward",
+                "instanceName" : "Matrix2FHIRServices",
+                "functionName" : "Matrix2FHIRServices",
                 "links" : [ ],
                 "endpoints" : [ ],
-                "containedElements" : [ ],
-                "elementVersion" : "0.0.1",
-                "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
-                "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
-              }, {
-                "topologyElementType" : "SERVICE_MODULE",
-                "instanceName" : "CommunicateIrisEdgeReceive",
-                "functionName" : "CommunicateIrisEdgeReceive",
-                "links" : [ ],
-                "endpoints" : [ {
-                  "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
-                  "endpointInstanceID" : "EdgeReceive.CommunicationEX",
-                  "endpointFunctionID" : "EdgeReceive.CommunicationEX",
-                  "friendlyName" : null,
-                  "isServer" : true,
-                  "requiresEncryption" : false,
-                  "internalDNSEntry" : null,
-                  "externalDNSEntry" : "Inherited",
-                  "internalPortNumber" : null,
-                  "externalPortNumber" : "10705"
+                "containedElements" : [ {
+                  "topologyElementType" : "PROCESSING_PLANT",
+                  "instanceName" : "Interact",
+                  "functionName" : "Interact",
+                  "links" : [ ],
+                  "endpoints" : [ ],
+                  "containedElements" : [ {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "MatrixApplicationServicesEventsReceiverWUP",
+                    "functionName" : "MatrixApplicationServicesEventsReceiverWUP",
+                    "links" : [ ],
+                    "endpoints" : [ {
+                      "endpointType" : "INGRES_MESSAGING",
+                      "endpointInstanceID" : "MatrixNotificationReceiver",
+                      "endpointFunctionID" : "MatrixNotificationReceiver",
+                      "friendlyName" : null,
+                      "isServer" : true,
+                      "requiresEncryption" : true,
+                      "internalDNSEntry" : null,
+                      "externalDNSEntry" : "Inherited",
+                      "internalPortNumber" : null,
+                      "externalPortNumber" : "10700"
+                    } ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.1.2",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  }, {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "MatrixApplicationServicesEventsSeperatorWUP",
+                    "functionName" : "MatrixApplicationServicesEventsSeperatorWUP",
+                    "links" : [ ],
+                    "endpoints" : [ ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.1.2",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  } ],
+                  "elementVersion" : "0.0.1",
+                  "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                  "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                }, {
+                  "topologyElementType" : "PROCESSING_PLANT",
+                  "instanceName" : "Transform",
+                  "functionName" : "Transform",
+                  "links" : [ ],
+                  "endpoints" : [ ],
+                  "containedElements" : [ {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "MatrixRoomCreate2FHIRGroupWUP",
+                    "functionName" : "MatrixRoomCreate2FHIRGroupWUP",
+                    "links" : [ ],
+                    "endpoints" : [ ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.0.1",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  }, {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "MatrixRoomIM2FHIRCommunicationWUP",
+                    "functionName" : "MatrixRoomIM2FHIRCommunicationWUP",
+                    "links" : [ ],
+                    "endpoints" : [ ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.0.1",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  }, {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "MatrixRoomName2FHIRGroup",
+                    "functionName" : "MatrixRoomName2FHIRGroup",
+                    "links" : [ ],
+                    "endpoints" : [ ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.0.1",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  } ],
+                  "elementVersion" : "0.0.1",
+                  "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                  "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                }, {
+                  "topologyElementType" : "PROCESSING_PLANT",
+                  "instanceName" : "Edge",
+                  "functionName" : "Edge",
+                  "links" : [ ],
+                  "endpoints" : [ ],
+                  "containedElements" : [ {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "Forward",
+                    "functionName" : "Forward",
+                    "links" : [ ],
+                    "endpoints" : [ ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.0.1",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  }, {
+                    "topologyElementType" : "WUP",
+                    "instanceName" : "Receive",
+                    "functionName" : "Receive",
+                    "links" : [ ],
+                    "endpoints" : [ {
+                      "endpointType" : "INGRES_MESSAGING",
+                      "endpointInstanceID" : "EdgeReceive.CommunicationEX",
+                      "endpointFunctionID" : "EdgeReceive.CommunicationEX",
+                      "friendlyName" : null,
+                      "isServer" : true,
+                      "requiresEncryption" : false,
+                      "internalDNSEntry" : null,
+                      "externalDNSEntry" : "Inherited",
+                      "internalPortNumber" : null,
+                      "externalPortNumber" : "10705"
+                    } ],
+                    "containedElements" : [ ],
+                    "elementVersion" : "0.0.1",
+                    "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                    "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
+                  } ],
+                  "elementVersion" : "0.0.1",
+                  "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
+                  "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
                 } ],
-                "containedElements" : [ ],
                 "elementVersion" : "0.0.1",
                 "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
                 "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
@@ -253,7 +333,7 @@
         "functionName" : "aether-fhirbreak-techone",
         "links" : [ ],
         "endpoints" : [ {
-          "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+          "endpointType" : "API",
           "endpointInstanceID" : "TechOneAPI",
           "endpointFunctionID" : "TechOneAPI",
           "friendlyName" : null,
@@ -376,7 +456,7 @@
             "functionName" : null,
             "links" : [ ],
             "endpoints" : [ {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosTopologySyncSvr",
               "endpointFunctionID" : "PetasosTopologySyncSvr",
               "friendlyName" : null,
@@ -387,7 +467,7 @@
               "internalPortNumber" : "10810",
               "externalPortNumber" : "10810"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosTopologySyncSvr",
               "endpointFunctionID" : "PetasosTopologySyncSvr",
               "friendlyName" : null,
@@ -398,7 +478,7 @@
               "internalPortNumber" : "10811",
               "externalPortNumber" : "10811"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "API",
               "endpointInstanceID" : "PetasosTopologySyncSvr",
               "endpointFunctionID" : "PetasosTopologySyncSvr",
               "friendlyName" : null,
@@ -409,7 +489,7 @@
               "internalPortNumber" : "10812",
               "externalPortNumber" : "10812"
             }, {
-              "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+              "endpointType" : "INGRES_MESSAGING",
               "endpointInstanceID" : "EdgeReceive.CommunicationEX",
               "endpointFunctionID" : "EdgeReceive.CommunicationEX",
               "friendlyName" : null,
@@ -442,7 +522,7 @@
                 "functionName" : "EdgeReceive",
                 "links" : [ ],
                 "endpoints" : [ {
-                  "endpointType" : "ELEMENT_TYPE_ENDPOINT_EXTERNAL",
+                  "endpointType" : "INGRES_MESSAGING",
                   "endpointInstanceID" : "EdgeReceive.CommunicationUN",
                   "endpointFunctionID" : "EdgeReceive.CommunicationUN",
                   "friendlyName" : null,

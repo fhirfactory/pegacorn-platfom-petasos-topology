@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
 
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.RDN;
@@ -60,6 +59,7 @@ public class TopologyDM {
     private ConcurrentHashMap<FDNToken, EndpointElement> endpointSet;
 
     public TopologyDM() {
+        LOG.info(".TopologyDM(): Constructor initialisation");
         this.deploymentSolutionName = null;
         this.nodeSet = new ConcurrentHashMap<FDNToken, NodeElement>();
         this.linkSet = new ConcurrentHashMap<FDNToken, LinkElement>();
@@ -82,7 +82,6 @@ public class TopologyDM {
      *
      * @param newElement The NodeElement to be added to the Set
      */
-    @Transactional
     public void addNode(NodeElement newElement) {
         LOG.debug(".addNode(): Entry, newElement --> {}", newElement);
         if (newElement == null) {
@@ -98,7 +97,6 @@ public class TopologyDM {
         }
     }
 
-    @Transactional
     public void removeNode(FDNToken elementID) {
         LOG.debug(".removeNode(): Entry, elementID --> {}", elementID);
         if (elementID == null) {
@@ -145,7 +143,6 @@ public class TopologyDM {
         }
     }
 
-    @Transactional
     public void addLink(LinkElement newLink) {
         LOG.debug(".addLink(): Entry, newLink --> {}", newLink);
         if (newLink == null) {
@@ -161,7 +158,6 @@ public class TopologyDM {
         }
     }
 
-    @Transactional
     public void removeLink(FDNToken linkID) {
         LOG.debug(".removeLink(): Entry, linkID --> {}", linkID);
         if (linkID == null) {
@@ -176,7 +172,6 @@ public class TopologyDM {
         LOG.debug(".removeLink(): Exit");
     }
 
-    @Transactional
     public Set<LinkElement> getLinkSet() {
         LOG.debug(".getLinkSet(): Entry");
         LinkedHashSet<LinkElement> linkSet = new LinkedHashSet<LinkElement>();
@@ -209,7 +204,6 @@ public class TopologyDM {
         }
     }
 
-    @Transactional
     public void addEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".addEndpoint(): Entry, newEndpoint --> {}", newEndpoint);
         if (newEndpoint == null) {
@@ -227,7 +221,6 @@ public class TopologyDM {
         }
     }
 
-    @Transactional
     public void removeEndpoint(FDNToken endpointID) {
         LOG.debug(".removeEndpoint(): Entry, endpointID --> {}", endpointID);
         if (endpointID == null) {
@@ -242,7 +235,6 @@ public class TopologyDM {
         LOG.debug(".removeEndpoint(): Exit");
     }
 
-    @Transactional
     public Set<EndpointElement> getEndpointSet() {
         LOG.debug(".getEndpointSet(): Entry");
         LinkedHashSet<EndpointElement> endpoints = new LinkedHashSet<EndpointElement>();
@@ -276,9 +268,10 @@ public class TopologyDM {
     }
 
     public Map<Integer, FDNToken> findNodesWithMatchingUnqualifiedInstanceName(String unqualifiedRDNName) {
-        LOG.debug(".findMatchingNode(): Entry, unqualifiedRDNName --> {}", unqualifiedRDNName);
+        LOG.debug(".findNodesWithMatchingUnqualifiedInstanceName(): Entry, unqualifiedRDNName --> {}", unqualifiedRDNName);
         HashMap<Integer, FDNToken> matchingSet = new HashMap<Integer, FDNToken>();
         Enumeration<FDNToken> elementIDEnumerator = nodeSet.keys();
+        LOG.trace(".findNodesWithMatchingUnqualifiedInstanceName(): nodeSet size --> {} ", nodeSet.size());
         int entryCount = 0;
         while (elementIDEnumerator.hasMoreElements()) {
             FDNToken currentElementId = elementIDEnumerator.nextElement();

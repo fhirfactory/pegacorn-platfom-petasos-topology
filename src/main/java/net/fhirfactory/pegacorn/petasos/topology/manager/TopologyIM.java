@@ -32,14 +32,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
+import net.fhirfactory.pegacorn.petasos.topology.loader.TopologySynchronisationServer;
 
 /**
  * This class WILL do more in the future, but it is for now just a proxy to the
  * TopologyDM.
  */
-
 @ApplicationScoped
 public class TopologyIM {
 
@@ -47,8 +47,9 @@ public class TopologyIM {
 
     @Inject
     TopologyDM topologyDataManager;
+    
 
-    @Transactional
+
     public void registerNode(NodeElement newNodeElement) {
         LOG.debug(".registerNode(): Entry, newElement --> {}", newNodeElement);
         topologyDataManager.addNode(newNodeElement);
@@ -57,7 +58,6 @@ public class TopologyIM {
         }
     }
 
-    @Transactional
     public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNode) {
         LOG.debug(".addContainedNodeToNode(), nodeID --> {}, containedNode --> {}", nodeID, containedNode);
         NodeElement containingElement = getNode(nodeID);
@@ -69,7 +69,6 @@ public class TopologyIM {
         }
     }
 
-    @Transactional
     public void unregisterNode(FDNToken elementID) {
         LOG.debug(".unregisterNode(): Entry, elementID --> {}", elementID);
         topologyDataManager.removeNode(elementID);
@@ -87,13 +86,11 @@ public class TopologyIM {
         return (retrievedNode);
     }
 
-    @Transactional
     public void registerLink(LinkElement newLink) {
         LOG.debug(".registerLink(): Entry, newLink --> {}", newLink);
         topologyDataManager.addLink(newLink);
     }
 
-    @Transactional
     public void unregisterLink(FDNToken linkID) {
         LOG.debug(".unregisterLink(): Entry, linkID --> {}", linkID);
         topologyDataManager.removeLink(linkID);
@@ -109,13 +106,11 @@ public class TopologyIM {
         return (topologyDataManager.getLink(linkID));
     }
 
-    @Transactional
     public void registerEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".registerLink(): Entry, newEndpoint --> {}", newEndpoint);
         topologyDataManager.addEndpoint(newEndpoint);
     }
 
-    @Transactional
     public void unregisterEndpoint(FDNToken endpointID) {
         LOG.debug(".unregisterLink(): Entry, endpointID --> {}", endpointID);
         topologyDataManager.removeEndpoint(endpointID);
@@ -130,64 +125,63 @@ public class TopologyIM {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
         return (topologyDataManager.getEndpoint(endpointID));
     }
-    
-    @Transactional
-    public void setInstanceInPlace(FDNToken nodeID, boolean instantionState){
+
+    public void setInstanceInPlace(FDNToken nodeID, boolean instantionState) {
         LOG.debug(".setInstanceInPlace(): Entry, nodeID --> {}, instantiationState --> {}", nodeID, instantionState);
         NodeElement retrievedNode = topologyDataManager.getNode(nodeID);
         retrievedNode.setInstanceInPlace(instantionState);
         LOG.debug(".setInstanceInPlace(): Exit");
     }
 
-
     // Business Methods
     public Map<Integer, FDNToken> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
         LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Entry, serviceModuleInstanceName --> {} ", serviceModuleInstanceName);
         Map<Integer, FDNToken> matchingIDs = topologyDataManager.findNodesWithMatchingUnqualifiedInstanceName(serviceModuleInstanceName);
+        LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Exit, matchingIDs count --> {}", matchingIDs.size());
         return (matchingIDs);
     }
-    
+
     public FDNToken getSolutionID() {
         FDNToken solutionID = topologyDataManager.getSolutionID();
         return (solutionID);
     }
 
-    public ConcurrencyModeEnum getConcurrencyMode(FDNToken nodeID){
+    public ConcurrencyModeEnum getConcurrencyMode(FDNToken nodeID) {
         LOG.debug(".getConcurrencyMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
-        if(nodeHierarchy.isEmpty()){
+        if (nodeHierarchy.isEmpty()) {
             LOG.debug(".getConcurrencyMode(): Exit, node hierarchy is empty - returning default mode");
-            return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
+            return (ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
         }
         int hierarchyHeight = nodeHierarchy.size();
-        for(int counter = 0; counter < hierarchyHeight; counter++){
+        for (int counter = 0; counter < hierarchyHeight; counter++) {
             NodeElement currentElement = nodeHierarchy.get(counter);
-            if(currentElement.getConcurrencyMode() != null){
-                LOG.debug(".getConcurrencyMode(): Exit, Found mode in hierarchy --> {}", currentElement.getConcurrencyMode() );
-                return(currentElement.getConcurrencyMode());
+            if (currentElement.getConcurrencyMode() != null) {
+                LOG.debug(".getConcurrencyMode(): Exit, Found mode in hierarchy --> {}", currentElement.getConcurrencyMode());
+                return (currentElement.getConcurrencyMode());
             }
         }
         LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
+        return (ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
     }
 
-    public ResilienceModeEnum getDeploymentResilienceMode(FDNToken nodeID){
+    public ResilienceModeEnum getDeploymentResilienceMode(FDNToken nodeID) {
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
-        if(nodeHierarchy.isEmpty()){
+        if (nodeHierarchy.isEmpty()) {
             LOG.debug(".getDeploymentResilienceMode(): Exit, node hierarchy is empty - returning default mode");
-            return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
+            return (ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
         }
         int hierarchyHeight = nodeHierarchy.size();
-        for(int counter = 0; counter < hierarchyHeight; counter++){
+        for (int counter = 0; counter < hierarchyHeight; counter++) {
             NodeElement currentElement = nodeHierarchy.get(counter);
-            if(currentElement.getResilienceMode() != null){
-                LOG.debug(".getDeploymentResilienceMode(): Exit, Found mode in hierarchy --> {}", currentElement.getResilienceMode() );
-                return(currentElement.getResilienceMode());
+            if (currentElement.getResilienceMode() != null) {
+                LOG.debug(".getDeploymentResilienceMode(): Exit, Found mode in hierarchy --> {}", currentElement.getResilienceMode());
+                return (currentElement.getResilienceMode());
             }
         }
         LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
+        return (ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
     }
 
 }

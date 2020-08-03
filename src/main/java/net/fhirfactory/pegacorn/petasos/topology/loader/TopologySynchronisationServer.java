@@ -24,6 +24,7 @@ package net.fhirfactory.pegacorn.petasos.topology.loader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.net.URL;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import net.fhirfactory.pegacorn.petasos.topology.loader.model.ConfigMapFileModel;
@@ -35,16 +36,38 @@ import org.slf4j.LoggerFactory;
  * @author Mark A. Hunter
  */
 @ApplicationScoped
-public class TopologyFileReader {
+public class TopologySynchronisationServer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TopologyFileReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopologySynchronisationServer.class);
+    boolean fileHasBeenLoaded;
+    Object fileHasBeenLoadedLock;
+
+    TopologySynchronisationServer() {
+        fileHasBeenLoaded = false;
+        fileHasBeenLoadedLock = new Object();
+    }
 
     @Inject
     TopologyFileElementTransformer transformer;
 
-    public void readFile(String filePath) {
-        LOG.info(".readFile(): Entry");
+    @PostConstruct
+    public void initialise() {
+        LOG.debug(".initialise(): Entry");
+        synchronized(fileHasBeenLoadedLock){
+            if (!fileHasBeenLoaded) {
+                synchroniseFromFile();
+                fileHasBeenLoaded = true;
+            }
+        }
+        LOG.debug(".initialise(): Exit");
+    }
 
+    public void synchroniseFromFile() {
+        if (fileHasBeenLoaded) {
+            return;
+        }
+        LOG.debug(".readFile(): Entry");
+        String filePath = "/META-INF/TopologyConfig.json";
         LOG.trace(".readFile(): Instantiate our ObjectMapper for JSON parsing of the Topology Configuration File");
         ObjectMapper objectMapper = new ObjectMapper();
         LOG.trace(".readFile(): Create the URL for the Topology Configuration File (it should be within the WAR), filename --> {}", filePath);
@@ -66,5 +89,6 @@ public class TopologyFileReader {
         }
         LOG.trace(".readFile(): Now processing the map file for Solution --> {}", mapFileContent.getSolutionNode().getFunctionName());
         transformer.convertToNodeElement(mapFileContent.getSolutionNode(), null, null);
+        LOG.debug(".readFile(): Exit, file processed.");
     }
 }

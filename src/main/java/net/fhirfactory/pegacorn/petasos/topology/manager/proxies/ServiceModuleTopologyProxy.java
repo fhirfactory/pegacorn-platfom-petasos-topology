@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MAHun
+ * Copyright (c) 2020 Mark A. Hunter (ACT Health)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@ package net.fhirfactory.pegacorn.petasos.topology.manager.proxies;
 
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
@@ -36,6 +36,7 @@ import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementFunctionToken;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
+import net.fhirfactory.pegacorn.petasos.topology.loader.TopologySynchronisationServer;
 import net.fhirfactory.pegacorn.petasos.topology.manager.TopologyIM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,10 @@ public class ServiceModuleTopologyProxy {
 
     @Inject
     TopologyIM topologyManager;
-
+    
+    @Inject
+    TopologySynchronisationServer topologySyncServer;
+    
     private static final Integer WUA_RETRY_LIMIT = 3;
     private static final Integer WUA_TIMEOUT_LIMIT = 10000; // 10 Seconds
     private static final Integer WUA_SLEEP_INTERVAL = 250; // 250 milliseconds
@@ -66,6 +70,7 @@ public class ServiceModuleTopologyProxy {
      */
     public FDNToken getServiceModuleInstanceID(String serviceModuleInstanceName, String version) {
         LOG.debug(".getServiceModuleInstanceID(): Entry, serviceModuleTypeName --> {}, version --> {}", serviceModuleInstanceName, version);
+        topologySyncServer.initialise();
         if (serviceModuleInstanceName == null || version == null) {
             throw (new IllegalArgumentException("getServiceModuleInstanceID(): serviceModuleInstanceName is null"));
         }
@@ -100,25 +105,31 @@ public class ServiceModuleTopologyProxy {
 
     public FDNToken getWUPInstanceID(String wupInstanceName, String version) {
         LOG.debug(".getWUPInstanceID(): Entry, serviceModuleTypeName --> {}, version --> {}", wupInstanceName, version);
+        topologySyncServer.initialise();
         if (wupInstanceName == null) {
             throw (new IllegalArgumentException("getWUPInstanceID(): serviceModuleInstanceName is null"));
         }
         Map<Integer, FDNToken> nodeSet = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(wupInstanceName);
+        LOG.trace(".getWUPInstanceID(): Retrieved candidate nodes from Topology Manager, size --> {}", nodeSet.size());
         if (nodeSet.isEmpty()) {
             throw (new IllegalArgumentException("getWUPInstanceID(): Not such serviceModuleInstanceName in Topology Map"));
         }
+        LOG.trace(".getWUPInstanceID(): Let's now go through candidate list and see if there is a version that matches our desired value");
         FDNToken instanceID = null;
         int nodeSetSize = nodeSet.size();
         boolean instanceFound = false;
         for (int counter = 0; counter < nodeSetSize; counter++) {
             FDNToken currentInstanceID = nodeSet.get(counter);
             FDN currentInstanceFDN = new FDN(currentInstanceID);
-            String currentInstanceFDNQualifier = currentInstanceFDN.getUnqualifiedRDN().getNameValue();
+            LOG.trace(".getWUPInstanceID(): Current candidate --> {}", currentInstanceFDN.getUnqualifiedRDN().getNameValue());
+            String currentInstanceFDNQualifier = currentInstanceFDN.getUnqualifiedRDN().getNameQualifier();
             boolean isOfTypeWUP = currentInstanceFDNQualifier.contentEquals(NodeElementTypeEnum.WUP.getNodeElementType());
             if (isOfTypeWUP) {
                 NodeElement matchingElement = topologyManager.getNode(currentInstanceID);
+                LOG.trace(".getWUPInstanceID(): the current candidate element is a WUP, its version is --> {}",matchingElement.getVersion() );
                 boolean isRightVersion = matchingElement.getVersion().contentEquals(version);
                 if (isRightVersion) {
+                    LOG.trace(".getWUPInstanceID(): the versions match!");
                     instanceFound = true;
                     instanceID = currentInstanceID;
                     break;
@@ -169,19 +180,16 @@ public class ServiceModuleTopologyProxy {
     }
 
     // Passthrough Calls
-    @Transactional
     public void registerNode(NodeElement newNodeElement) {
         LOG.debug(".registerNode(): Entry, newElement --> {}", newNodeElement);
         topologyManager.registerNode(newNodeElement);
     }
 
-    @Transactional
     public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNode) {
         LOG.debug(".addContainedNodeToNode(), nodeID --> {}, containedNode --> {}", nodeID, containedNode);
         topologyManager.addContainedNodeToNode(nodeID, containedNode);
     }
 
-    @Transactional
     public void unregisterNode(FDNToken elementID) {
         LOG.debug(".unregisterNode(): Entry, elementID --> {}", elementID);
         topologyManager.unregisterNode(elementID);
@@ -200,14 +208,12 @@ public class ServiceModuleTopologyProxy {
         return (retrievedNode);
     }
 
-    @Transactional
     public void registerLink(LinkElement newLink) {
         LOG.debug(".registerLink(): Entry, newLink --> {}", newLink);
         topologyManager.registerLink(newLink);
         LOG.debug(".unregisterLink(): Exit");
     }
 
-    @Transactional
     public void unregisterLink(FDNToken linkID) {
         LOG.debug(".unregisterLink(): Entry, linkID --> {}", linkID);
         topologyManager.unregisterLink(linkID);
@@ -228,13 +234,11 @@ public class ServiceModuleTopologyProxy {
         return (link);
     }
 
-    @Transactional
     public void registerEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".registerEndpoint(): Entry, newEndpoint --> {}", newEndpoint);
         topologyManager.registerEndpoint(newEndpoint);
     }
 
-    @Transactional
     public void unregisterEndpoint(FDNToken endpointID) {
         LOG.debug(".unregisterEndpoint(): Entry, endpointID --> {}", endpointID);
         topologyManager.unregisterEndpoint(endpointID);
@@ -281,7 +285,6 @@ public class ServiceModuleTopologyProxy {
         return (resilienceMode);
     }
 
-    @Transactional
     public void setInstanceInPlace(FDNToken nodeID, boolean instantionState) {
         LOG.debug(".setInstanceInPlace(): Entry, nodeID --> {}, instantiationState --> {}", nodeID, instantionState);
         NodeElement retrievedNode = topologyManager.getNode(nodeID);
