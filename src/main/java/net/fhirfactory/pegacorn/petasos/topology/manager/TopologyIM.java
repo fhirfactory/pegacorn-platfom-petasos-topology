@@ -22,19 +22,21 @@
 package net.fhirfactory.pegacorn.petasos.topology.manager;
 
 import java.util.Map;
-import net.fhirfactory.pegacorn.common.model.FDNToken;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
-import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
-import net.fhirfactory.pegacorn.petasos.model.topology.*;
-import net.fhirfactory.pegacorn.petasos.topology.cache.TopologyDM;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import net.fhirfactory.pegacorn.petasos.topology.loader.TopologySynchronisationServer;
+import net.fhirfactory.pegacorn.common.model.FDNToken;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
+import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
+import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
+import net.fhirfactory.pegacorn.petasos.topology.cache.TopologyDM;
 
 /**
  * This class WILL do more in the future, but it is for now just a proxy to the
@@ -123,6 +125,8 @@ public class TopologyIM {
 
     public EndpointElement getEndpoint(FDNToken endpointID) {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
+        EndpointElement element = topologyDataManager.getEndpoint(endpointID);
+        LOG.info(".getEndpoint(): Exit, EndpointElement --> {}", element);
         return (topologyDataManager.getEndpoint(endpointID));
     }
 

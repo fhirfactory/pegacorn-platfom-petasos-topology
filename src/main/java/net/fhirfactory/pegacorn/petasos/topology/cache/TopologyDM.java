@@ -21,8 +21,7 @@
  */
 package net.fhirfactory.pegacorn.petasos.topology.cache;
 
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
 
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
@@ -31,9 +30,6 @@ import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 
@@ -43,10 +39,8 @@ import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
 
 
 /**
- * 
  * @author Mark A. Hunter
  * @since 2020-07-01
- * 
  */
 @ApplicationScoped
 public class TopologyDM {
@@ -77,8 +71,11 @@ public class TopologyDM {
     /**
      * This function adds an entry to the Element Set.
      * <p>
- Note that the default behaviour is to UPDATE the values with the set if
- there already exists an instance for the specified FDNToken (identifier).
+     * Note that the default behaviour is to UPDATE the values with the set if
+     * there already exists an instance for the specified FDNToken (identifier).
+     *
+     * Note, we have to do a deep inspection of the ConcurrentHashMap key (FDNToken) content,
+     * as the default only only looks for equivalence with respect to the action Object instance.
      *
      * @param newElement The NodeElement to be added to the Set
      */
@@ -90,8 +87,22 @@ public class TopologyDM {
         if (newElement.getNodeInstanceID() == null) {
             throw (new IllegalArgumentException(".addNode(): bad elementID within newElement"));
         }
-        if (this.nodeSet.containsKey(newElement.getNodeInstanceID())) {
-            this.nodeSet.replace(newElement.getNodeInstanceID(), newElement);
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.nodeSet.keys();
+        FDNToken currentNodeID = null;
+        while (list.hasMoreElements()) {
+            currentNodeID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".getNode(): Cache Entry --> {}", currentNodeID.toFullString());
+            }
+            if (currentNodeID.equals(newElement)) {
+                LOG.trace(".addNode(): Element already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
+            this.nodeSet.replace(currentNodeID, newElement);
         } else {
             this.nodeSet.put(newElement.getNodeInstanceID(), newElement);
         }
@@ -102,10 +113,20 @@ public class TopologyDM {
         if (elementID == null) {
             throw (new IllegalArgumentException(".removeNode(): elementID is null"));
         }
-        if (this.nodeSet.containsKey(elementID)) {
-            LOG.trace(".removeNode(): Element found, now removing it...");
-            this.nodeSet.remove(elementID);
-        } else {
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.nodeSet.keys();
+        while (list.hasMoreElements()) {
+            FDNToken currentNodeID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".getNode(): Cache Entry --> {}", currentNodeID.toFullString());
+            }
+            if (currentNodeID.equals(elementID)) {
+                LOG.trace(".removeNode(): Element found, now removing it...");
+                this.nodeSet.remove(elementID);
+                elementFound = true;
+            }
+        }
+        if(!elementFound){
             LOG.trace(".removeNode(): No element with that elementID is in the map");
         }
         LOG.debug(".removeNode(): Exit");
@@ -131,16 +152,21 @@ public class TopologyDM {
             LOG.debug(".getNode(): Exit, provided a null nodeID , so returning null");
             return (null);
         }
-        if (this.nodeSet.containsKey(nodeID)) {
-            LOG.trace(".getNode(): Element found!!! WooHoo!");
-            NodeElement retrievedElement = this.nodeSet.get(nodeID);
-            LOG.debug(".getNode(): Exit, returning element --> {}", retrievedElement);
-            return (retrievedElement);
-        } else {
-            LOG.trace(".getNode(): Couldn't find element!");
-            LOG.debug(".getNode(): Exit, returning null as an element with the specified ID was not in the map");
-            return (null);
+        Enumeration<FDNToken> list = this.nodeSet.keys();
+        while (list.hasMoreElements()) {
+            FDNToken currentNodeID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".getNode(): Cache Entry --> {}", currentNodeID.toFullString());
+            }
+            if (currentNodeID.equals(nodeID)) {
+                LOG.trace(".getNode(): Node found!!! WooHoo!");
+                NodeElement retrievedNode = this.nodeSet.get(currentNodeID);
+                LOG.debug(".getNode(): Exit, returning Endpoint --> {}", retrievedNode);
+                return (retrievedNode);
+            }
         }
+        LOG.debug(".getNode(): Exit, returning null as an element with the specified ID was not in the map");
+        return (null);
     }
 
     public void addLink(LinkElement newLink) {
@@ -151,8 +177,22 @@ public class TopologyDM {
         if (newLink.getLinkID() == null) {
             throw (new IllegalArgumentException(".addLink(): bad Route Token within newLink"));
         }
-        if (this.linkSet.containsKey(newLink.getLinkID())) {
-            this.linkSet.replace(newLink.getLinkID(), newLink);
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.linkSet.keys();
+        FDNToken currentLinkID = null;
+        while (list.hasMoreElements()) {
+            currentLinkID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".addLink(): Cache Entry --> {}", currentLinkID.toFullString());
+            }
+            if (currentLinkID.equals(newLink)) {
+                LOG.trace(".addLink(): Link already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
+            this.linkSet.replace(currentLinkID, newLink);
         } else {
             this.linkSet.put(newLink.getLinkID(), newLink);
         }
@@ -163,9 +203,23 @@ public class TopologyDM {
         if (linkID == null) {
             throw (new IllegalArgumentException(".removeLink(): linkID is null"));
         }
-        if (this.linkSet.containsKey(linkID)) {
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.linkSet.keys();
+        FDNToken currentLinkID = null;
+        while (list.hasMoreElements()) {
+            currentLinkID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".addLink(): Cache Entry --> {}", currentLinkID.toFullString());
+            }
+            if (currentLinkID.equals(linkID)) {
+                LOG.trace(".addLink(): Link already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
             LOG.trace(".removeLink(): Route found, now removing it...");
-            this.linkSet.remove(linkID);
+            this.linkSet.remove(currentLinkID);
         } else {
             LOG.trace(".removeLink(): No route with that linkID is in the map");
         }
@@ -192,9 +246,23 @@ public class TopologyDM {
             LOG.debug(".getLink(): Exit, provided a null linkID , so returning null");
             return (null);
         }
-        if (this.nodeSet.containsKey(linkID)) {
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.linkSet.keys();
+        FDNToken currentLinkID = null;
+        while (list.hasMoreElements()) {
+            currentLinkID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".addLink(): Cache Entry --> {}", currentLinkID.toFullString());
+            }
+            if (currentLinkID.equals(linkID)) {
+                LOG.trace(".addLink(): Link already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
             LOG.trace(".getLink(): Link found!!! WooHoo!");
-            LinkElement retrievedLink = this.linkSet.get(linkID);
+            LinkElement retrievedLink = this.linkSet.get(currentLinkID);
             LOG.debug(".getLink(): Exit, returning Link --> {}", retrievedLink);
             return (retrievedLink);
         } else {
@@ -212,9 +280,23 @@ public class TopologyDM {
         if (newEndpoint.getEndpointInstanceID() == null) {
             throw (new IllegalArgumentException(".addLink(): bad Route Token within newEndpoint"));
         }
-        if (this.endpointSet.containsKey(newEndpoint.getEndpointInstanceID())) {
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.endpointSet.keys();
+        FDNToken currentEndpointID = null;
+        while (list.hasMoreElements()) {
+            currentEndpointID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".addEndpoint(): Endpoint Cache Entry --> {}", currentEndpointID.toFullString());
+            }
+            if (currentEndpointID.equals(newEndpoint)) {
+                LOG.trace(".addEndpoint(): Endpoint already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
             LOG.trace(".addEndpoint(): Replacing Existing Endpoint in Cache");
-            this.endpointSet.replace(newEndpoint.getEndpointInstanceID(), newEndpoint);
+            this.endpointSet.replace(currentEndpointID, newEndpoint);
         } else {
             LOG.trace(".addEndpoint(): Adding Endpoint to Cache");
             this.endpointSet.put(newEndpoint.getEndpointInstanceID(), newEndpoint);
@@ -226,9 +308,23 @@ public class TopologyDM {
         if (endpointID == null) {
             throw (new IllegalArgumentException(".removeEndpoint(): endpointID is null"));
         }
-        if (this.endpointSet.containsKey(endpointID)) {
+        boolean elementFound = false;
+        Enumeration<FDNToken> list = this.endpointSet.keys();
+        FDNToken currentEndpointID = null;
+        while (list.hasMoreElements()) {
+            currentEndpointID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".removeEndpoint(): Cache Entry --> {}", currentEndpointID.toFullString());
+            }
+            if (currentEndpointID.equals(endpointID)) {
+                LOG.trace(".removeEndpoint(): Link already in Cache");
+                elementFound = true;
+                break;
+            }
+        }
+        if (elementFound) {
             LOG.trace(".removeEndpoint(): Route found, now removing it...");
-            this.endpointSet.remove(endpointID);
+            this.endpointSet.remove(currentEndpointID);
         } else {
             LOG.trace(".removeEndpoint(): No route with that linkID is in the map");
         }
@@ -250,21 +346,27 @@ public class TopologyDM {
     }
 
     public EndpointElement getEndpoint(FDNToken endpointID) {
-        LOG.debug(".getEndpoint(): Entry, linkID --> {}", endpointID);
+        LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
         if (endpointID == null) {
-            LOG.debug(".getEndpoint(): Exit, provided a null linkID , so returning null");
+            LOG.debug(".getEndpoint(): Exit, provided a null endpointID , so returning null");
             return (null);
         }
-        if (this.nodeSet.containsKey(endpointID)) {
-            LOG.trace(".getEndpoint(): Link found!!! WooHoo!");
-            EndpointElement retrievedEndpoint = this.endpointSet.get(endpointID);
-            LOG.debug(".getEndpoint(): Exit, returning Endpoint --> {}", retrievedEndpoint);
-            return (retrievedEndpoint);
-        } else {
-            LOG.trace(".getEndpoint(): Couldn't find Endpoint!");
-            LOG.debug(".getEndpoint(): Exit, returning null as an Endpoint with the specified ID was not in the map");
-            return (null);
+        LOG.trace(".getEndpoint(): Searched For Endpoint ID --> {}", endpointID.toFullString());
+        Enumeration<FDNToken> list = this.endpointSet.keys();
+        while (list.hasMoreElements()) {
+            FDNToken currentEndpointID = list.nextElement();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(".getEndpoint(): Cache Entry --> {}", currentEndpointID.toFullString());
+            }
+            if (currentEndpointID.equals(endpointID)) {
+                LOG.trace(".getEndpoint(): Endpoint found!!! WooHoo!");
+                EndpointElement retrievedEndpoint = this.endpointSet.get(currentEndpointID);
+                LOG.debug(".getEndpoint(): Exit, returning Endpoint --> {}", retrievedEndpoint);
+                return (retrievedEndpoint);
+            }
         }
+        LOG.debug(".getEndpoint(): Exit, returning null as an Endpoint with the specified ID was not in the map");
+        return (null);
     }
 
     public Map<Integer, FDNToken> findNodesWithMatchingUnqualifiedInstanceName(String unqualifiedRDNName) {
@@ -323,9 +425,9 @@ public class TopologyDM {
                 }
             }
         }
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug(".getNodeContainmentHierarchy(): Exit, retrieved Heirarchy, depth --> {}", nodeHierarchy.size());
         }
-        return(nodeHierarchy);
+        return (nodeHierarchy);
     }
 }
