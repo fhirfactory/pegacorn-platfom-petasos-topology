@@ -25,8 +25,11 @@ import java.util.*;
 
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElementIdentifier;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementIdentifier;
 import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.LinkElementIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,24 +50,26 @@ public class TopologyDM {
 
     private static final Logger LOG = LoggerFactory.getLogger(TopologyDM.class);
 
-    private FDNToken deploymentSolutionName;
-    private ConcurrentHashMap<FDNToken, NodeElement> nodeSet;
-    private ConcurrentHashMap<FDNToken, LinkElement> linkSet;
-    private ConcurrentHashMap<FDNToken, EndpointElement> endpointSet;
+    private NodeElementIdentifier deploymentSolutionName;
+    private ConcurrentHashMap<NodeElementIdentifier, NodeElement> nodeSet;
+    private ConcurrentHashMap<String, FDNToken> nodeKeySet;
+    private ConcurrentHashMap<LinkElementIdentifier, LinkElement> linkSet;
+    private ConcurrentHashMap<EndpointElementIdentifier, EndpointElement> endpointSet;
 
     public TopologyDM() {
         LOG.info(".TopologyDM(): Constructor initialisation");
         this.deploymentSolutionName = null;
-        this.nodeSet = new ConcurrentHashMap<FDNToken, NodeElement>();
-        this.linkSet = new ConcurrentHashMap<FDNToken, LinkElement>();
-        this.endpointSet = new ConcurrentHashMap<FDNToken, EndpointElement>();
+        this.nodeSet = new ConcurrentHashMap<NodeElementIdentifier, NodeElement>();
+        this.linkSet = new ConcurrentHashMap<LinkElementIdentifier, LinkElement>();
+        this.nodeKeySet = new ConcurrentHashMap<String, FDNToken>();
+        this.endpointSet = new ConcurrentHashMap<EndpointElementIdentifier, EndpointElement>();
     }
 
-    public FDNToken getDeploymentSolutionName() {
+    public NodeElementIdentifier getDeploymentSolutionName() {
         return deploymentSolutionName;
     }
 
-    public void setDeploymentSolutionName(FDNToken deploymentSolutionName) {
+    public void setDeploymentSolutionName(NodeElementIdentifier deploymentSolutionName) {
         this.deploymentSolutionName = deploymentSolutionName;
     }
 
@@ -84,12 +89,12 @@ public class TopologyDM {
         if (newElement == null) {
             throw (new IllegalArgumentException(".addNode(): newElement is null"));
         }
-        if (newElement.getNodeInstanceID() == null) {
+        if (newElement.getIdentifier() == null) {
             throw (new IllegalArgumentException(".addNode(): bad elementID within newElement"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.nodeSet.keys();
-        FDNToken currentNodeID = null;
+        Enumeration<NodeElementIdentifier> list = this.nodeSet.keys();
+        NodeElementIdentifier currentNodeID = null;
         while (list.hasMoreElements()) {
             currentNodeID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -102,26 +107,33 @@ public class TopologyDM {
             }
         }
         if (elementFound) {
-            this.nodeSet.replace(currentNodeID, newElement);
+        	String nodeKey = currentNodeID.toString() +"."+newElement.getVersion();
+            this.nodeSet.put(currentNodeID, newElement);
+            this.nodeKeySet.replace(nodeKey, currentNodeID);
         } else {
-            this.nodeSet.put(newElement.getNodeInstanceID(), newElement);
+        	String nodeKey = newElement.getIdentifier().toString() + "."+newElement.getVersion();
+            this.nodeSet.put(newElement.getIdentifier(), newElement);
+            this.nodeKeySet.put(nodeKey, newElement.getIdentifier());
         }
     }
 
-    public void removeNode(FDNToken elementID) {
+    public void removeNode(NodeElementIdentifier elementID) {
         LOG.debug(".removeNode(): Entry, elementID --> {}", elementID);
         if (elementID == null) {
             throw (new IllegalArgumentException(".removeNode(): elementID is null"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.nodeSet.keys();
+        Enumeration<NodeElementIdentifier> list = this.nodeSet.keys();
         while (list.hasMoreElements()) {
-            FDNToken currentNodeID = list.nextElement();
+            NodeElementIdentifier currentNodeID = list.nextElement();
             if (LOG.isTraceEnabled()) {
                 LOG.trace(".getNode(): Cache Entry --> {}", currentNodeID.toFullString());
             }
             if (currentNodeID.equals(elementID)) {
                 LOG.trace(".removeNode(): Element found, now removing it...");
+                NodeElement currentElement = this.getNode(currentNodeID);
+                String nodeKey = currentNodeID.toString() + "."+currentElement.getVersion();
+                this.nodeKeySet.remove(nodeKey);
                 this.nodeSet.remove(elementID);
                 elementFound = true;
             }
@@ -146,13 +158,13 @@ public class TopologyDM {
         return (elementSet);
     }
 
-    public NodeElement getNode(FDNToken nodeID) {
+    public NodeElement getNode(NodeElementIdentifier nodeID) {
         LOG.debug(".getNode(): Entry, nodeID --> {}", nodeID);
         if (nodeID == null) {
             LOG.debug(".getNode(): Exit, provided a null nodeID , so returning null");
             return (null);
         }
-        Enumeration<FDNToken> list = this.nodeSet.keys();
+        Enumeration<NodeElementIdentifier> list = this.nodeSet.keys();
         while (list.hasMoreElements()) {
             FDNToken currentNodeID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -168,6 +180,14 @@ public class TopologyDM {
         LOG.debug(".getNode(): Exit, returning null as an element with the specified ID was not in the map");
         return (null);
     }
+    
+    public NodeElement getNodeByKey(String nodeKey) {
+    	LOG.debug(".getNodeByKey(): Entry, nodeKey --> {}", nodeKey);
+    	FDNToken nodeID = this.nodeKeySet.get(nodeKey);
+    	NodeElementIdentifier nodeIdentifier = new NodeElementIdentifier(nodeID);
+    	NodeElement nodeElement = getNode(nodeIdentifier);
+    	return(nodeElement);
+    }
 
     public void addLink(LinkElement newLink) {
         LOG.debug(".addLink(): Entry, newLink --> {}", newLink);
@@ -178,8 +198,8 @@ public class TopologyDM {
             throw (new IllegalArgumentException(".addLink(): bad Route Token within newLink"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.linkSet.keys();
-        FDNToken currentLinkID = null;
+        Enumeration<LinkElementIdentifier> list = this.linkSet.keys();
+        LinkElementIdentifier currentLinkID = null;
         while (list.hasMoreElements()) {
             currentLinkID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -198,13 +218,13 @@ public class TopologyDM {
         }
     }
 
-    public void removeLink(FDNToken linkID) {
+    public void removeLink(LinkElementIdentifier linkID) {
         LOG.debug(".removeLink(): Entry, linkID --> {}", linkID);
         if (linkID == null) {
             throw (new IllegalArgumentException(".removeLink(): linkID is null"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.linkSet.keys();
+        Enumeration<LinkElementIdentifier> list = this.linkSet.keys();
         FDNToken currentLinkID = null;
         while (list.hasMoreElements()) {
             currentLinkID = list.nextElement();
@@ -240,14 +260,14 @@ public class TopologyDM {
         return (linkSet);
     }
 
-    public LinkElement getLink(FDNToken linkID) {
+    public LinkElement getLink(LinkElementIdentifier linkID) {
         LOG.debug(".getLink(): Entry, linkID --> {}", linkID);
         if (linkID == null) {
             LOG.debug(".getLink(): Exit, provided a null linkID , so returning null");
             return (null);
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.linkSet.keys();
+        Enumeration<LinkElementIdentifier> list = this.linkSet.keys();
         FDNToken currentLinkID = null;
         while (list.hasMoreElements()) {
             currentLinkID = list.nextElement();
@@ -281,8 +301,8 @@ public class TopologyDM {
             throw (new IllegalArgumentException(".addLink(): bad Route Token within newEndpoint"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.endpointSet.keys();
-        FDNToken currentEndpointID = null;
+        Enumeration<EndpointElementIdentifier> list = this.endpointSet.keys();
+        EndpointElementIdentifier currentEndpointID = null;
         while (list.hasMoreElements()) {
             currentEndpointID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -303,14 +323,14 @@ public class TopologyDM {
         }
     }
 
-    public void removeEndpoint(FDNToken endpointID) {
+    public void removeEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".removeEndpoint(): Entry, endpointID --> {}", endpointID);
         if (endpointID == null) {
             throw (new IllegalArgumentException(".removeEndpoint(): endpointID is null"));
         }
         boolean elementFound = false;
-        Enumeration<FDNToken> list = this.endpointSet.keys();
-        FDNToken currentEndpointID = null;
+        Enumeration<EndpointElementIdentifier> list = this.endpointSet.keys();
+        EndpointElementIdentifier currentEndpointID = null;
         while (list.hasMoreElements()) {
             currentEndpointID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -345,14 +365,14 @@ public class TopologyDM {
         return (endpoints);
     }
 
-    public EndpointElement getEndpoint(FDNToken endpointID) {
+    public EndpointElement getEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
         if (endpointID == null) {
             LOG.debug(".getEndpoint(): Exit, provided a null endpointID , so returning null");
             return (null);
         }
         LOG.trace(".getEndpoint(): Searched For Endpoint ID --> {}", endpointID.toFullString());
-        Enumeration<FDNToken> list = this.endpointSet.keys();
+        Enumeration<EndpointElementIdentifier> list = this.endpointSet.keys();
         while (list.hasMoreElements()) {
             FDNToken currentEndpointID = list.nextElement();
             if (LOG.isTraceEnabled()) {
@@ -369,19 +389,20 @@ public class TopologyDM {
         return (null);
     }
 
-    public Map<Integer, FDNToken> findNodesWithMatchingUnqualifiedInstanceName(String unqualifiedRDNName) {
+    public Map<Integer, NodeElementIdentifier> findNodesWithMatchingUnqualifiedInstanceName(String unqualifiedRDNName) {
         LOG.debug(".findNodesWithMatchingUnqualifiedInstanceName(): Entry, unqualifiedRDNName --> {}", unqualifiedRDNName);
-        HashMap<Integer, FDNToken> matchingSet = new HashMap<Integer, FDNToken>();
-        Enumeration<FDNToken> elementIDEnumerator = nodeSet.keys();
+        HashMap<Integer, NodeElementIdentifier> matchingSet = new HashMap<Integer, NodeElementIdentifier>();
+        Enumeration<NodeElementIdentifier> elementIDEnumerator = nodeSet.keys();
         LOG.trace(".findNodesWithMatchingUnqualifiedInstanceName(): nodeSet size --> {} ", nodeSet.size());
         int entryCount = 0;
         while (elementIDEnumerator.hasMoreElements()) {
-            FDNToken currentElementId = elementIDEnumerator.nextElement();
+        	NodeElementIdentifier currentElementId = elementIDEnumerator.nextElement();
             FDN currentElementFDN = new FDN(currentElementId);
             RDN currentElementUnqualifiedRDN = currentElementFDN.getUnqualifiedRDN();
             String currentElementRDNValue = currentElementUnqualifiedRDN.getNameValue();
             if (currentElementRDNValue.contentEquals(unqualifiedRDNName)) {
-                matchingSet.put(entryCount, currentElementId);
+            	NodeElementIdentifier nodeInstance = new NodeElementIdentifier(currentElementId);
+                matchingSet.put(entryCount, nodeInstance);
                 entryCount++;
             }
         }
@@ -389,10 +410,10 @@ public class TopologyDM {
         return (matchingSet);
     }
 
-    public FDNToken getSolutionID() {
-        Enumeration<FDNToken> elementIDEnumerator = nodeSet.keys();
+    public NodeElementIdentifier getSolutionID() {
+        Enumeration<NodeElementIdentifier> elementIDEnumerator = nodeSet.keys();
         while (elementIDEnumerator.hasMoreElements()) {
-            FDNToken currentElementId = elementIDEnumerator.nextElement();
+            NodeElementIdentifier currentElementId = elementIDEnumerator.nextElement();
             FDN currentElementFDN = new FDN(currentElementId);
             RDN currentElementUnqualifiedRDN = currentElementFDN.getUnqualifiedRDN();
             if (currentElementUnqualifiedRDN.getNameQualifier().contentEquals(NodeElementTypeEnum.SOLUTION.getNodeElementType())) {
@@ -402,7 +423,7 @@ public class TopologyDM {
         return (null);
     }
 
-    public Map<Integer, NodeElement> getNodeContainmentHierarchy(FDNToken nodeID) {
+    public Map<Integer, NodeElement> getNodeContainmentHierarchy(NodeElementIdentifier nodeID) {
         LOG.debug(".getNodeContainmentHierarchy(): Entry, nodeID --> {}", nodeID);
         HashMap<Integer, NodeElement> nodeHierarchy = new HashMap<Integer, NodeElement>();
         if (nodeID == null) {
@@ -410,7 +431,7 @@ public class TopologyDM {
         }
         boolean hasContainer = true;
         int counter = 0;
-        FDNToken currentNode = nodeID;
+        NodeElementIdentifier currentNode = nodeID;
         while (hasContainer) {
             NodeElement currentElement = nodeSet.get(currentNode);
             if (currentElement == null) {

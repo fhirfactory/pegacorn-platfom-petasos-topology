@@ -28,7 +28,9 @@ import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.common.model.RDN;
 import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElementIdentifier;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
+import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementIdentifier;
 import net.fhirfactory.pegacorn.petasos.topology.loader.model.ConfigMapEndpointElement;
 import net.fhirfactory.pegacorn.petasos.topology.loader.model.ConfigMapNodeElement;
 import net.fhirfactory.pegacorn.petasos.topology.manager.TopologyIM;
@@ -47,7 +49,7 @@ public class TopologyFileElementTransformer {
     @Inject
     TopologyIM topologyInformationManager;
 
-    public NodeElement convertToNodeElement(ConfigMapNodeElement incomingNodeDetail, FDNToken parentNodeInstanceID, FDNToken parentNodeFunctionID) {
+    public NodeElement convertToNodeElement(ConfigMapNodeElement incomingNodeDetail, NodeElementIdentifier parentNodeInstanceID, FDNToken parentNodeFunctionID) {
         LOG.debug(".convertToNodeElement(): Entry, incomingNodeDetail --> {}, parentNodeInstanceID --> {}, parentNodeFunctionID --> {}", incomingNodeDetail, parentNodeInstanceID, parentNodeFunctionID);
 
         NodeElement newNode = new NodeElement();
@@ -67,7 +69,8 @@ public class TopologyFileElementTransformer {
             newNodeInstanceID = new FDN(parentNodeInstanceID);
         }
         newNodeInstanceID.appendRDN(new RDN(incomingNodeDetail.getTopologyElementType().getNodeElementType(), incomingNodeDetail.getInstanceName()));
-        newNode.setNodeInstanceID(newNodeInstanceID.getToken());
+        NodeElementIdentifier nodeIdentifier = new NodeElementIdentifier(newNodeInstanceID.getToken());
+        newNode.setNodeInstanceID(nodeIdentifier);
         LOG.trace(".convertToNodeElement(): Adding the FunctionID to the new NodeElement, function name --> {}", incomingNodeDetail.getFunctionName());
         FDN newNodeFunctionID;
         if (parentNodeFunctionID == null) {
@@ -98,11 +101,12 @@ public class TopologyFileElementTransformer {
                 LOG.trace("convertToNodeElement(): Adding the contained Node ID --> {}", containedNode.getInstanceName());
                 FDN containedNodeFDN = new FDN(newNodeInstanceID);
                 containedNodeFDN.appendRDN(new RDN(containedNode.getTopologyElementType().getNodeElementType(), containedNode.getInstanceName()));
-                newNode.addContainedElement(containedNodeFDN.getToken());
+                NodeElementIdentifier containedNodeIdentifier = new NodeElementIdentifier(containedNodeFDN.getToken());
+                newNode.addContainedElement(containedNodeIdentifier);
                 if (newNode.getNodeFunctionID() == null) {
-                    convertToNodeElement(containedNode, newNodeInstanceID.getToken(), parentNodeFunctionID);
+                    convertToNodeElement(containedNode, containedNodeIdentifier, parentNodeFunctionID);
                 } else {
-                    convertToNodeElement(containedNode, newNodeInstanceID.getToken(), newNodeFunctionID.getToken());
+                    convertToNodeElement(containedNode, containedNodeIdentifier, newNodeFunctionID.getToken());
                 }
             }
         }
@@ -113,7 +117,7 @@ public class TopologyFileElementTransformer {
             while (endPointIterator.hasNext()) {
                 ConfigMapEndpointElement currentElement = endPointIterator.next();
                 LOG.trace(".convertToNodeElement(): Adding the contained Endpoint --> {}", currentElement.getEndpointInstanceID());
-                EndpointElement endpoint = convertToEndpointElement(currentElement, newNodeInstanceID.getToken(), newNodeFunctionID.getToken());
+                EndpointElement endpoint = convertToEndpointElement(currentElement, nodeIdentifier, newNodeFunctionID.getToken());
                 LOG.trace(".convertToNodeElement(): Converted ConfigMapEndpointElement to EndpointElement --> {}", endpoint);
                 newNode.addEndpoint(endpoint.getEndpointInstanceID());
                 LOG.trace(".convertToNodeElement(): Calling on Topology Manager to register Endpoint, endpoint --> {}", endpoint);
@@ -125,11 +129,11 @@ public class TopologyFileElementTransformer {
 
     }
 
-    public EndpointElement convertToEndpointElement(ConfigMapEndpointElement incomingEndpointDetail, FDNToken containingNodeInstanceID, FDNToken containingNodeFunctionID) {
+    public EndpointElement convertToEndpointElement(ConfigMapEndpointElement incomingEndpointDetail, NodeElementIdentifier containingNodeInstanceID, FDNToken containingNodeFunctionID) {
         LOG.debug(".convertToEndpointElement(): Entry, incomingEndpointDetail --> {}, containingNodeInstanceID --> {}, containingNodeFunctionID --> {}", incomingEndpointDetail, containingNodeInstanceID, containingNodeFunctionID);
         EndpointElement newElement = new EndpointElement();
         LOG.trace(".convertToEndpointElement(): Adding Containing Node (Function) --> {}", containingNodeFunctionID);
-        newElement.setContainingNodeID(containingNodeFunctionID);
+        newElement.setContainingNodeID(containingNodeInstanceID);
         LOG.trace(".convertToEndpointElement(): Adding Endpoint Function ID --> {}", incomingEndpointDetail.getEndpointFunctionID());
         FDN endpointFunctionFDN = new FDN(containingNodeFunctionID);
         endpointFunctionFDN.appendRDN(new RDN(incomingEndpointDetail.getEndpointType().getEndpointType(), incomingEndpointDetail.getEndpointFunctionID()));
@@ -137,19 +141,33 @@ public class TopologyFileElementTransformer {
         LOG.trace(".convertToEndpointElement(): Adding Endpoint Instance ID --> {}", incomingEndpointDetail.getEndpointInstanceID());
         FDN endpointInstanceID = new FDN(containingNodeInstanceID);
         endpointInstanceID.appendRDN(new RDN(incomingEndpointDetail.getEndpointType().getEndpointType(), incomingEndpointDetail.getEndpointInstanceID()));
-        newElement.setEndpointInstanceID(endpointInstanceID.getToken());
+        EndpointElementIdentifier endpointID = new EndpointElementIdentifier(endpointInstanceID.getToken());
+        newElement.setEndpointInstanceID(endpointID);
         LOG.trace(".convertToEndpointElement(): Adding Friendly Name --> {}", incomingEndpointDetail.getFriendlyName());
         newElement.setFriendlyName(incomingEndpointDetail.getFriendlyName());
         LOG.trace(".convertToEndpointElement(): Adding Hostname --> {}", incomingEndpointDetail.getInternalDNSEntry());
-        newElement.setHostname(incomingEndpointDetail.getInternalDNSEntry());
-        LOG.trace(".convertToEndpointElement(): Adding Port Number --> {}", incomingEndpointDetail.getInternalPortNumber());
-        newElement.setPort(Integer.getInteger(incomingEndpointDetail.getInternalPortNumber()));
+        newElement.setHostname(resolveHostname(incomingEndpointDetail.getInternalDNSEntry()));
+        LOG.trace(".convertToEndpointElement(): Adding InternalPort Number --> {}", incomingEndpointDetail.getInternalPortNumber());
+        newElement.setInternalPort(incomingEndpointDetail.getInternalPortNumber());
+        LOG.trace(".convertToEndpointElement(): Adding ExposedPort Number --> {}", incomingEndpointDetail.getExternalPortNumber());
+        newElement.setInternalPort(incomingEndpointDetail.getInternalPortNumber());
         LOG.trace(".convertToEndpointElement(): Adding isServer --> {}", incomingEndpointDetail.isIsServer());
         newElement.setServer(incomingEndpointDetail.isIsServer());
         LOG.trace(".convertToEndpointElement(): Adding Endpoint Type --> {}", incomingEndpointDetail.getEndpointType());
         newElement.setEndpointType(incomingEndpointDetail.getEndpointType());
         LOG.debug(".convertToEndpointElement(): Exit, newElement --> {}", newElement);
         return (newElement);
+    }
+    
+    // TODO Hostname lookup should occur here...
+    public String resolveHostname(String extractedHostname) {
+    	if(extractedHostname == null) {
+    		return("localhost");
+    	}
+    	if(extractedHostname.contentEquals("___")) {
+    		return("localhost");
+    	}
+    	return(extractedHostname);
     }
 
 }

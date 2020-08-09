@@ -21,6 +21,7 @@
  */
 package net.fhirfactory.pegacorn.petasos.topology.manager.proxies;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -31,16 +32,21 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
-import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementFunctionToken;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElementTypeEnum;
+import net.fhirfactory.pegacorn.petasos.model.topology.*;
+import net.fhirfactory.pegacorn.petasos.model.wup.WUPIdentifier;
 import net.fhirfactory.pegacorn.petasos.topology.loader.TopologySynchronisationServer;
 import net.fhirfactory.pegacorn.petasos.topology.manager.TopologyIM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is a Proxy to the Topology IM with some key (business function) capabilities associated
+ * with the management and support of the Service Modules and Work Unit Processors.
+ *
+ * @author Mark A. Hunter
+ * @since 2020-07-01
+ *
+ */
 @ApplicationScoped
 public class ServiceModuleTopologyProxy {
 
@@ -64,25 +70,24 @@ public class ServiceModuleTopologyProxy {
      * Modules will have the same name - other than the replicated instances of
      * course).
      *
-     * @param serviceModuleInstanceName The unqualified (but unique) Service
-     * Module name
+     * @param serviceModuleInstanceName The unqualified (but unique) Service Module name
      * @return the FDNToken Instance ID of the Service Module.
      */
-    public FDNToken getServiceModuleInstanceID(String serviceModuleInstanceName, String version) {
+    public NodeElementIdentifier getServiceModuleInstanceID(String serviceModuleInstanceName, String version) {
         LOG.debug(".getServiceModuleInstanceID(): Entry, serviceModuleTypeName --> {}, version --> {}", serviceModuleInstanceName, version);
         topologySyncServer.initialise();
         if (serviceModuleInstanceName == null || version == null) {
             throw (new IllegalArgumentException("getServiceModuleInstanceID(): serviceModuleInstanceName is null"));
         }
-        Map<Integer, FDNToken> nodeSet = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(serviceModuleInstanceName);
+        Map<Integer, NodeElementIdentifier> nodeSet = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(serviceModuleInstanceName);
         if (nodeSet.isEmpty()) {
             throw (new IllegalArgumentException("getServiceModuleInstanceID(): Not such serviceModuleInstanceName in Topology Map"));
         }
-        FDNToken instanceID = null;
+        NodeElementIdentifier instanceID = null;
         int nodeSetSize = nodeSet.size();
         boolean instanceFound = false;
         for (int counter = 0; counter < nodeSetSize; counter++) {
-            FDNToken currentInstanceID = nodeSet.get(counter);
+            NodeElementIdentifier currentInstanceID = nodeSet.get(counter);
             FDN currentInstanceFDN = new FDN(currentInstanceID);
             String currentInstanceFDNQualifier = currentInstanceFDN.getUnqualifiedRDN().getNameValue();
             boolean isOfTypeServiceModule = currentInstanceFDNQualifier.contentEquals(NodeElementTypeEnum.SERVICE_MODULE.getNodeElementType());
@@ -103,35 +108,46 @@ public class ServiceModuleTopologyProxy {
         return (instanceID);
     }
 
-    public FDNToken getWUPInstanceID(String wupInstanceName, String version) {
+    /**
+     * This function extracts the appropriate Work Unit Processor (WUP) Instance ID (FDNToken) from the Topology Cache -
+     * base on the context of the invoking WUP (derived within the context of the wildfly instance), the unqualified
+     * name of the WUP (which needs to be unique within the context of the Service Module / wildfly instance) and the
+     * Version number.
+     *
+     * @param wupInstanceName A (Service Module) unique name for a the Work Unit Processor (WUP)
+     * @param version The version number of the Work Unit Processor (WUP)
+     * @return The (solution-wide) unique Identifier (FDNToken) for the Work Unit Processor (WUP)
+     */
+    public WUPIdentifier getWUPIdentifier(String wupInstanceName, String version) {
         LOG.debug(".getWUPInstanceID(): Entry, serviceModuleTypeName --> {}, version --> {}", wupInstanceName, version);
         topologySyncServer.initialise();
         if (wupInstanceName == null) {
             throw (new IllegalArgumentException("getWUPInstanceID(): serviceModuleInstanceName is null"));
         }
-        Map<Integer, FDNToken> nodeSet = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(wupInstanceName);
+        Map<Integer, NodeElementIdentifier> nodeSet = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(wupInstanceName);
         LOG.trace(".getWUPInstanceID(): Retrieved candidate nodes from Topology Manager, size --> {}", nodeSet.size());
         if (nodeSet.isEmpty()) {
             throw (new IllegalArgumentException("getWUPInstanceID(): Not such serviceModuleInstanceName in Topology Map"));
         }
         LOG.trace(".getWUPInstanceID(): Let's now go through candidate list and see if there is a version that matches our desired value");
-        FDNToken instanceID = null;
+        WUPIdentifier instanceID = null;
         int nodeSetSize = nodeSet.size();
         boolean instanceFound = false;
         for (int counter = 0; counter < nodeSetSize; counter++) {
-            FDNToken currentInstanceID = nodeSet.get(counter);
+            NodeElementIdentifier currentInstanceID = nodeSet.get(counter);
             FDN currentInstanceFDN = new FDN(currentInstanceID);
             LOG.trace(".getWUPInstanceID(): Current candidate --> {}", currentInstanceFDN.getUnqualifiedRDN().getNameValue());
             String currentInstanceFDNQualifier = currentInstanceFDN.getUnqualifiedRDN().getNameQualifier();
             boolean isOfTypeWUP = currentInstanceFDNQualifier.contentEquals(NodeElementTypeEnum.WUP.getNodeElementType());
             if (isOfTypeWUP) {
-                NodeElement matchingElement = topologyManager.getNode(currentInstanceID);
+                NodeElementIdentifier nodeID = new NodeElementIdentifier(currentInstanceID);
+                NodeElement matchingElement = topologyManager.getNode(nodeID);
                 LOG.trace(".getWUPInstanceID(): the current candidate element is a WUP, its version is --> {}",matchingElement.getVersion() );
                 boolean isRightVersion = matchingElement.getVersion().contentEquals(version);
                 if (isRightVersion) {
                     LOG.trace(".getWUPInstanceID(): the versions match!");
                     instanceFound = true;
-                    instanceID = currentInstanceID;
+                    instanceID = new WUPIdentifier(currentInstanceID);
                     break;
                 }
             }
@@ -139,11 +155,19 @@ public class ServiceModuleTopologyProxy {
         if (!instanceFound) {
             throw (new IllegalArgumentException("getWUPInstanceID(): Not such serviceModuleInstanceName (" + wupInstanceName + "), version (" + version + ") in Topology Map"));
         }
-        LOG.debug(".getWUPInstanceID(): Entry, instanceID --> {}", instanceID);
+        LOG.debug(".getWUPInstanceID(): Exit, instanceID --> {}", instanceID);
         return (instanceID);
     }
 
-    public NodeElementFunctionToken getServiceModuleFunctionToken(FDNToken serviceModuleID) {
+    /**
+     * This function pulls the NodeElement from the Topology Cache (via the TopologyIM --> TopologyDM) for the specified
+     * ServiceModule and then constructs a new NodeElementFunctionToken with the Function ID (FDNToken) and Version
+     * from the NodeElement.
+     *
+     * @param serviceModuleID The unique (FDNToken) of the ServiceModule
+     * @return An unambiguous descriptor of the functional processing capability of the ServiceModule (NodeElementFunctionToken).
+     */
+    public NodeElementFunctionToken getServiceModuleFunctionToken(NodeElementIdentifier serviceModuleID) {
         LOG.debug(".getServiceModuleFunctionID(): Entry, serviceModuleID --> {}", serviceModuleID);
         NodeElement node = topologyManager.getNode(serviceModuleID);
         NodeElementFunctionToken functionToken = new NodeElementFunctionToken();
@@ -153,12 +177,25 @@ public class ServiceModuleTopologyProxy {
         return (functionToken);
     }
 
-    public NodeElementFunctionToken getWUPFunctionToken(FDNToken wupID) {
+    /**
+     * This function pulls the NodeElement from the Topology Cache (via the TopologyIM <--> TopologyDM) for the specified
+     * Work Unit Processor (WUP) and then constructs a new NodeElementFunctionToken with the Function ID (FDNToken) and Version
+     * from the NodeElement.
+     *
+     * @param wupID The unique (FDNToken) of the Work Unit Processor (WUP)
+     * @return An unambiguous descriptor of the functional processing capability of the WUP (NodeElementFunctionToken).
+     */
+    public NodeElementFunctionToken getWUPFunctionToken(WUPIdentifier wupID) {
         LOG.debug(".getWUPFunctionID(): Entry, wupID --> {}", wupID);
-        NodeElement node = topologyManager.getNode(wupID);
+        NodeElementIdentifier nodeID = new NodeElementIdentifier(wupID);
+        NodeElement node = topologyManager.getNode(nodeID);
         NodeElementFunctionToken functionToken = new NodeElementFunctionToken();
-        functionToken.setFunctionID(node.getNodeFunctionID());
-        functionToken.setVersion(node.getVersion());
+        FDNToken functionID = node.getNodeFunctionID();
+        LOG.trace(".getWUPFunctionToken(): functionID --> {}", functionID);
+        String version = node.getVersion();
+        LOG.trace(".getWUPFunctionToken(): version --> {}", version);
+        functionToken.setVersion(version);
+        functionToken.setFunctionID(functionID);
         LOG.debug(".getWUPFunctionID(): Exit, functionToken --> {}", functionToken);
         return (functionToken);
     }
@@ -179,33 +216,47 @@ public class ServiceModuleTopologyProxy {
         return (WUA_CLEAN_UP_AGE_LIMIT);
     }
 
-    // Passthrough Calls
+    //
+    // Passthrough Calls straight into the Topology Server (TopologyIM)
+    //
+
     public void registerNode(NodeElement newNodeElement) {
         LOG.debug(".registerNode(): Entry, newElement --> {}", newNodeElement);
         topologyManager.registerNode(newNodeElement);
+        LOG.debug(".registerNode(): Exit, newElement --> {}", newNodeElement);
     }
 
-    public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNode) {
-        LOG.debug(".addContainedNodeToNode(), nodeID --> {}, containedNode --> {}", nodeID, containedNode);
+    public void addContainedNodeToNode(NodeElementIdentifier nodeID, NodeElement containedNode) {
+        LOG.debug(".addContainedNodeToNode(): Entry, nodeID --> {}, containedNode --> {}", nodeID, containedNode);
         topologyManager.addContainedNodeToNode(nodeID, containedNode);
+        LOG.debug(".addContainedNodeToNode(): Exit");
     }
 
-    public void unregisterNode(FDNToken elementID) {
+    public void unregisterNode(NodeElementIdentifier elementID) {
         LOG.debug(".unregisterNode(): Entry, elementID --> {}", elementID);
         topologyManager.unregisterNode(elementID);
+        LOG.debug(".unregisterNode(): Exit");
     }
 
     public Set<NodeElement> getNodeSet() {
         LOG.debug(".getNodeSet(): Entry");
         Set<NodeElement> returnedNodeSet = topologyManager.getNodeSet();
+        LOG.debug(".getNodeSet(): Entry, returnedNodeSet --> {}", returnedNodeSet);
         return (returnedNodeSet);
     }
 
-    public NodeElement getNode(FDNToken nodeID) {
+    public NodeElement getNode(NodeElementIdentifier nodeID) {
         LOG.debug(".getNode(): Entry, nodeID --> {}", nodeID);
         NodeElement retrievedNode = topologyManager.getNode(nodeID);
         LOG.debug(".getNode(): Exit, retrievedNode --> {}", retrievedNode);
         return (retrievedNode);
+    }
+    
+    public NodeElement getNodeByKey(String nodeKey) {
+        LOG.debug(".getNodeByKey(): Entry, nodeKey --> {}", nodeKey);
+        NodeElement retrievedNode = topologyManager.getNodeByKey(nodeKey);
+        LOG.debug(".getNodeByKey(): Exit, retrievedNode --> {}", retrievedNode);
+        return (retrievedNode);   	
     }
 
     public void registerLink(LinkElement newLink) {
@@ -214,7 +265,7 @@ public class ServiceModuleTopologyProxy {
         LOG.debug(".unregisterLink(): Exit");
     }
 
-    public void unregisterLink(FDNToken linkID) {
+    public void unregisterLink(LinkElementIdentifier linkID) {
         LOG.debug(".unregisterLink(): Entry, linkID --> {}", linkID);
         topologyManager.unregisterLink(linkID);
         LOG.debug(".unregisterLink(): Exit");
@@ -223,11 +274,11 @@ public class ServiceModuleTopologyProxy {
     public Set<LinkElement> getLinkSet() {
         LOG.debug(".getLinkSet(): Entry");
         Set<LinkElement> linkSet = topologyManager.getLinkSet();
-        LOG.debug(".getLinkSet(): Exit");
+        LOG.debug(".getLinkSet(): Exit, linkSet --> {}", linkSet);
         return (linkSet);
     }
 
-    public LinkElement getLink(FDNToken linkID) {
+    public LinkElement getLink(LinkElementIdentifier linkID) {
         LOG.debug(".getLink(): Entry, linkID --> {}", linkID);
         LinkElement link = topologyManager.getLink(linkID);
         LOG.debug(".getLink(): Exit, link --> {}", link);
@@ -237,9 +288,10 @@ public class ServiceModuleTopologyProxy {
     public void registerEndpoint(EndpointElement newEndpoint) {
         LOG.debug(".registerEndpoint(): Entry, newEndpoint --> {}", newEndpoint);
         topologyManager.registerEndpoint(newEndpoint);
+        LOG.debug(".registerEndpoint(): Entry");
     }
 
-    public void unregisterEndpoint(FDNToken endpointID) {
+    public void unregisterEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".unregisterEndpoint(): Entry, endpointID --> {}", endpointID);
         topologyManager.unregisterEndpoint(endpointID);
         LOG.debug(".unregisterEndpoint(): Exit");
@@ -248,48 +300,67 @@ public class ServiceModuleTopologyProxy {
     public Set<EndpointElement> getEndpointSet() {
         LOG.debug(".getEndpointSet(): Entry");
         Set<EndpointElement> endpointSet = topologyManager.getEndpointSet();
-        LOG.debug(".getEndpointSet(): Exit");
+        LOG.debug(".getEndpointSet(): Exit, endpointSet --> {}", endpointSet);
         return (endpointSet);
     }
 
-    public EndpointElement getEndpoint(FDNToken endpointID) {
+    public EndpointElement getEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
+        if(LOG.isTraceEnabled()){
+            endpointListPrint();
+        }
         EndpointElement endpoint = topologyManager.getEndpoint(endpointID);
         LOG.debug(".getEndpoint(): Exit, endpoint --> {}", endpoint);
         return (endpoint);
     }
 
-    // Business Methods
-    public Map<Integer, FDNToken> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
+    private void endpointListPrint(){
+        LOG.trace(".endpointListPrint(): Entry");
+        Set<EndpointElement> endpointSet = topologyManager.getEndpointSet();
+        LOG.trace(".endpointListPrint(): Set Size --> {}", endpointSet.size());
+        Iterator<EndpointElement> endpointIterator = endpointSet.iterator();
+        while(endpointIterator.hasNext()){
+            EndpointElement endpoint = endpointIterator.next();
+            LOG.trace(".endpointListPrint(): Entry --> {}", endpoint.getEndpointInstanceID());
+        }
+    }
+
+    //
+    // Passthrough Business Methods
+    //
+
+    public Map<Integer, NodeElementIdentifier> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
         LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Entry, serviceModuleInstanceName --> {} ", serviceModuleInstanceName);
-        Map<Integer, FDNToken> matchingIDs = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(serviceModuleInstanceName);
+        Map<Integer, NodeElementIdentifier> matchingIDs = topologyManager.getNodesWithMatchinUnqualifiedInstanceName(serviceModuleInstanceName);
+        LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Exit, matchingIDs --> {}", matchingIDs);
         return (matchingIDs);
     }
 
     public FDNToken getSolutionID() {
+        LOG.debug(".getSolutionID(): Entry");
         FDNToken solutionID = topologyManager.getSolutionID();
+        LOG.debug(".getSolutionID(): Exit, solutionID --> {}", solutionID);
         return (solutionID);
     }
 
-    public ConcurrencyModeEnum getConcurrencyMode(FDNToken nodeID) {
+    public ConcurrencyModeEnum getConcurrencyMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getConcurrencyMode(): Entry, nodeID --> {}", nodeID);
         ConcurrencyModeEnum concurrencyMode = topologyManager.getConcurrencyMode(nodeID);
-        LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
+        LOG.debug(".getConcurrencyMode(): Exit, concurrencyMode --> {}", concurrencyMode);
         return (concurrencyMode);
     }
 
-    public ResilienceModeEnum getDeploymentResilienceMode(FDNToken nodeID) {
+    public ResilienceModeEnum getDeploymentResilienceMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
         ResilienceModeEnum resilienceMode = topologyManager.getDeploymentResilienceMode(nodeID);
-        LOG.debug(".getDeploymentResilienceMode(): Exit, couldn't find anything - so returning default");
+        LOG.debug(".getDeploymentResilienceMode(): Exit, resilienceMode --> {}", resilienceMode);
         return (resilienceMode);
     }
 
-    public void setInstanceInPlace(FDNToken nodeID, boolean instantionState) {
+    public void setNodeInstantiated(NodeElementIdentifier nodeID, boolean instantionState) {
         LOG.debug(".setInstanceInPlace(): Entry, nodeID --> {}, instantiationState --> {}", nodeID, instantionState);
         NodeElement retrievedNode = topologyManager.getNode(nodeID);
         retrievedNode.setInstanceInPlace(instantionState);
         LOG.debug(".setInstanceInPlace(): Exit");
     }
-
 }

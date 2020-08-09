@@ -59,7 +59,7 @@
         "endpoints" : [ ],
         "containedElements" : [ {
           "topologyElementType" : "SITE",
-          "instanceName" : "SiteA",
+          "instanceName" : "___",
           "functionName" : null,
           "links" : [ ],
           "endpoints" : [ ],
@@ -115,7 +115,7 @@
             } ],
             "containedElements" : [ {
               "topologyElementType" : "PLATFORM",
-              "instanceName" : "Derived",
+              "instanceName" : "___",
               "functionName" : null,
               "links" : [ ],
               "endpoints" : [ ],
@@ -143,13 +143,13 @@
                       "friendlyName" : null,
                       "isServer" : true,
                       "requiresEncryption" : true,
-                      "internalDNSEntry" : null,
-                      "externalDNSEntry" : "Inherited",
-                      "internalPortNumber" : null,
+                      "internalDNSEntry" : "___",
+                      "externalDNSEntry" : "___",
+                      "internalPortNumber" : "10700",
                       "externalPortNumber" : "10700"
                     } ],
                     "containedElements" : [ ],
-                    "elementVersion" : "0.1.2",
+                    "elementVersion" : "0.0.1",
                     "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
                     "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
                   }, {
@@ -159,7 +159,7 @@
                     "links" : [ ],
                     "endpoints" : [ ],
                     "containedElements" : [ ],
-                    "elementVersion" : "0.1.2",
+                    "elementVersion" : "0.0.1",
                     "resilienceMode" : "RESILIENCE_MODE_STANDALONE",
                     "concurrencyMode" : "CONCURRENCY_MODE_STANDALONE"
                   } ],
@@ -229,8 +229,8 @@
                     "links" : [ ],
                     "endpoints" : [ {
                       "endpointType" : "INGRES_MESSAGING",
-                      "endpointInstanceID" : "EdgeReceive.CommunicationEX",
-                      "endpointFunctionID" : "EdgeReceive.CommunicationEX",
+                      "endpointInstanceID" : "CommunicationEX",
+                      "endpointFunctionID" : "CommunicationEX",
                       "friendlyName" : null,
                       "isServer" : true,
                       "requiresEncryption" : false,
@@ -446,7 +446,7 @@
         "endpoints" : [ ],
         "containedElements" : [ {
           "topologyElementType" : "SITE",
-          "instanceName" : "SiteA",
+          "instanceName" : "___",
           "functionName" : null,
           "links" : [ ],
           "endpoints" : [ ],
@@ -463,7 +463,7 @@
               "isServer" : true,
               "requiresEncryption" : false,
               "internalDNSEntry" : null,
-              "externalDNSEntry" : "Derived",
+              "externalDNSEntry" : "___",
               "internalPortNumber" : "10810",
               "externalPortNumber" : "10810"
             }, {
@@ -474,7 +474,7 @@
               "isServer" : true,
               "requiresEncryption" : false,
               "internalDNSEntry" : null,
-              "externalDNSEntry" : "Derived",
+              "externalDNSEntry" : "___",
               "internalPortNumber" : "10811",
               "externalPortNumber" : "10811"
             }, {
@@ -485,7 +485,7 @@
               "isServer" : true,
               "requiresEncryption" : true,
               "internalDNSEntry" : null,
-              "externalDNSEntry" : "Derived",
+              "externalDNSEntry" : "___",
               "internalPortNumber" : "10812",
               "externalPortNumber" : "10812"
             }, {
@@ -502,7 +502,7 @@
             } ],
             "containedElements" : [ {
               "topologyElementType" : "PLATFORM",
-              "instanceName" : "Derived",
+              "instanceName" : "___",
               "functionName" : null,
               "links" : [ ],
               "endpoints" : [ ],

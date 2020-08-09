@@ -27,15 +27,13 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import net.fhirfactory.pegacorn.petasos.model.topology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fhirfactory.pegacorn.common.model.FDNToken;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ConcurrencyModeEnum;
 import net.fhirfactory.pegacorn.petasos.model.resilience.mode.ResilienceModeEnum;
-import net.fhirfactory.pegacorn.petasos.model.topology.EndpointElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.LinkElement;
-import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
 import net.fhirfactory.pegacorn.petasos.topology.cache.TopologyDM;
 
 /**
@@ -49,7 +47,6 @@ public class TopologyIM {
 
     @Inject
     TopologyDM topologyDataManager;
-    
 
 
     public void registerNode(NodeElement newNodeElement) {
@@ -60,18 +57,18 @@ public class TopologyIM {
         }
     }
 
-    public void addContainedNodeToNode(FDNToken nodeID, NodeElement containedNode) {
+    public void addContainedNodeToNode(NodeElementIdentifier nodeID, NodeElement containedNode) {
         LOG.debug(".addContainedNodeToNode(), nodeID --> {}, containedNode --> {}", nodeID, containedNode);
         NodeElement containingElement = getNode(nodeID);
         if (containingElement != null) {
             LOG.trace(".addContainedNodeToNode(): Containing Node exists, so add contained node!");
-            containingElement.addContainedElement(containedNode.getNodeInstanceID());
+            containingElement.addContainedElement(containedNode.getIdentifier());
         } else {
             LOG.trace(".addContainedNodeToNode(): Containing Node doesn't exist, so the containedNode is actually the Top node!");
         }
     }
 
-    public void unregisterNode(FDNToken elementID) {
+    public void unregisterNode(NodeElementIdentifier elementID) {
         LOG.debug(".unregisterNode(): Entry, elementID --> {}", elementID);
         topologyDataManager.removeNode(elementID);
     }
@@ -81,11 +78,18 @@ public class TopologyIM {
         return (topologyDataManager.getNodeSet());
     }
 
-    public NodeElement getNode(FDNToken nodeID) {
+    public NodeElement getNode(NodeElementIdentifier nodeID) {
         LOG.debug(".getNode(): Entry, nodeID --> {}", nodeID);
         NodeElement retrievedNode = topologyDataManager.getNode(nodeID);
         LOG.debug(".getNode(): Exit, retrievedNode --> {}", retrievedNode);
         return (retrievedNode);
+    }
+    
+    public NodeElement getNodeByKey(String nodeKey) {
+        LOG.debug(".getNodeByKey(): Entry, nodeKey --> {}", nodeKey);
+        NodeElement retrievedNode = topologyDataManager.getNodeByKey(nodeKey);
+        LOG.debug(".getNodeByKey(): Exit, retrievedNode --> {}", retrievedNode);
+        return (retrievedNode);   	
     }
 
     public void registerLink(LinkElement newLink) {
@@ -93,7 +97,7 @@ public class TopologyIM {
         topologyDataManager.addLink(newLink);
     }
 
-    public void unregisterLink(FDNToken linkID) {
+    public void unregisterLink(LinkElementIdentifier linkID) {
         LOG.debug(".unregisterLink(): Entry, linkID --> {}", linkID);
         topologyDataManager.removeLink(linkID);
     }
@@ -103,7 +107,7 @@ public class TopologyIM {
         return (topologyDataManager.getLinkSet());
     }
 
-    public LinkElement getLink(FDNToken linkID) {
+    public LinkElement getLink(LinkElementIdentifier linkID) {
         LOG.debug(".getLink(): Entry, linkID --> {}", linkID);
         return (topologyDataManager.getLink(linkID));
     }
@@ -113,7 +117,7 @@ public class TopologyIM {
         topologyDataManager.addEndpoint(newEndpoint);
     }
 
-    public void unregisterEndpoint(FDNToken endpointID) {
+    public void unregisterEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".unregisterLink(): Entry, endpointID --> {}", endpointID);
         topologyDataManager.removeEndpoint(endpointID);
     }
@@ -123,14 +127,14 @@ public class TopologyIM {
         return (topologyDataManager.getEndpointSet());
     }
 
-    public EndpointElement getEndpoint(FDNToken endpointID) {
+    public EndpointElement getEndpoint(EndpointElementIdentifier endpointID) {
         LOG.debug(".getEndpoint(): Entry, endpointID --> {}", endpointID);
         EndpointElement element = topologyDataManager.getEndpoint(endpointID);
         LOG.info(".getEndpoint(): Exit, EndpointElement --> {}", element);
         return (topologyDataManager.getEndpoint(endpointID));
     }
 
-    public void setInstanceInPlace(FDNToken nodeID, boolean instantionState) {
+    public void setInstanceInPlace(NodeElementIdentifier nodeID, boolean instantionState) {
         LOG.debug(".setInstanceInPlace(): Entry, nodeID --> {}, instantiationState --> {}", nodeID, instantionState);
         NodeElement retrievedNode = topologyDataManager.getNode(nodeID);
         retrievedNode.setInstanceInPlace(instantionState);
@@ -138,9 +142,9 @@ public class TopologyIM {
     }
 
     // Business Methods
-    public Map<Integer, FDNToken> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
+    public Map<Integer, NodeElementIdentifier> getNodesWithMatchinUnqualifiedInstanceName(String serviceModuleInstanceName) {
         LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Entry, serviceModuleInstanceName --> {} ", serviceModuleInstanceName);
-        Map<Integer, FDNToken> matchingIDs = topologyDataManager.findNodesWithMatchingUnqualifiedInstanceName(serviceModuleInstanceName);
+        Map<Integer, NodeElementIdentifier> matchingIDs = topologyDataManager.findNodesWithMatchingUnqualifiedInstanceName(serviceModuleInstanceName);
         LOG.debug(".getNodesWithMatchinUnqualifiedInstanceName(): Exit, matchingIDs count --> {}", matchingIDs.size());
         return (matchingIDs);
     }
@@ -150,7 +154,7 @@ public class TopologyIM {
         return (solutionID);
     }
 
-    public ConcurrencyModeEnum getConcurrencyMode(FDNToken nodeID) {
+    public ConcurrencyModeEnum getConcurrencyMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getConcurrencyMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
         if (nodeHierarchy.isEmpty()) {
@@ -169,7 +173,7 @@ public class TopologyIM {
         return (ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
     }
 
-    public ResilienceModeEnum getDeploymentResilienceMode(FDNToken nodeID) {
+    public ResilienceModeEnum getDeploymentResilienceMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
         Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
         if (nodeHierarchy.isEmpty()) {

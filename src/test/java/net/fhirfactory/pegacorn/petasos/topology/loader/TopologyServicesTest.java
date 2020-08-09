@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
+
 import net.fhirfactory.pegacorn.common.model.FDN;
 import net.fhirfactory.pegacorn.petasos.model.topology.NodeElement;
 import net.fhirfactory.pegacorn.petasos.topology.manager.TopologyIM;
@@ -85,7 +85,7 @@ public class TopologyServicesTest {
         Iterator<NodeElement> nodeSetIterator = nodeSet.iterator();
         while (nodeSetIterator.hasNext()) {
             NodeElement currentNode = nodeSetIterator.next();
-            FDN currentNodeFDN = new FDN(currentNode.getNodeInstanceID());
+            FDN currentNodeFDN = new FDN(currentNode.getIdentifier());
             LOG.info(".testTopologyServer(): Node Instance ID--> {}", currentNodeFDN.getUnqualifiedToken());
         }
     }
@@ -100,7 +100,7 @@ public class TopologyServicesTest {
         Iterator<NodeElement> nodeSetIterator = nodeSet.iterator();
         while (nodeSetIterator.hasNext()) {
             NodeElement currentNode = nodeSetIterator.next();
-            LOG.info(".testServiceModuleTopologyProxy(): Node Instance ID--> {}", currentNode.getNodeInstanceID());
+            LOG.info(".testServiceModuleTopologyProxy(): Node Instance ID--> {}", currentNode.getIdentifier());
         }
     }
 }
