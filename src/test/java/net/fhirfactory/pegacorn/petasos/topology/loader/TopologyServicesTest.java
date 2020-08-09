@@ -77,30 +77,30 @@ public class TopologyServicesTest {
 */
     @Test
     public void testTopologyServer() {
-        LOG.info(".testTopologyServer(): Info Test");
+        LOG.debug(".testTopologyServer(): Info Test");
         topologyLoader.initialise();
-        LOG.info(".testTopologyServer(): Now showing content of the TopologyCache");
+        LOG.trace(".testTopologyServer(): Now showing content of the TopologyCache");
         Set<NodeElement> nodeSet = topologyServer.getNodeSet();
-        LOG.info(".testTopologyServer(): nodeSet --> {}", nodeSet);
+        LOG.trace(".testTopologyServer(): nodeSet --> {}", nodeSet);
         Iterator<NodeElement> nodeSetIterator = nodeSet.iterator();
         while (nodeSetIterator.hasNext()) {
             NodeElement currentNode = nodeSetIterator.next();
             FDN currentNodeFDN = new FDN(currentNode.getIdentifier());
-            LOG.info(".testTopologyServer(): Node Instance ID--> {}", currentNodeFDN.getUnqualifiedToken());
+            LOG.trace(".testTopologyServer(): Node Instance ID--> {}", currentNodeFDN.getUnqualifiedToken());
         }
     }
 
     @Test
     public void testServiceModuleTopologyProxy() {
-        LOG.info(".testServiceModuleTopologyProxy(): Info Test");
+        LOG.debug(".testServiceModuleTopologyProxy(): Info Test");
         topologyLoader.initialise();
-        LOG.info(".testServiceModuleTopologyProxy(): Now showing content of the TopologyCache via the ServiceModuleTopologyProxy");
+        LOG.trace(".testServiceModuleTopologyProxy(): Now showing content of the TopologyCache via the ServiceModuleTopologyProxy");
         Set<NodeElement> nodeSet = serviceModuleProxy.getNodeSet();
-        LOG.info(".testServiceModuleTopologyProxy(): nodeSet --> {}", nodeSet);
+        LOG.trace(".testServiceModuleTopologyProxy(): nodeSet --> {}", nodeSet);
         Iterator<NodeElement> nodeSetIterator = nodeSet.iterator();
         while (nodeSetIterator.hasNext()) {
             NodeElement currentNode = nodeSetIterator.next();
-            LOG.info(".testServiceModuleTopologyProxy(): Node Instance ID--> {}", currentNode.getIdentifier());
+            LOG.trace(".testServiceModuleTopologyProxy(): Node Instance ID--> {}", currentNode.getIdentifier());
         }
     }
 }
