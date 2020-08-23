@@ -58,7 +58,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${version-org.apache.commons-lang3}</version>
         </dependency>
 
 
@@ -72,7 +71,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${version-com.fasterxml.jackson.core-jackson-core}</version>
         </dependency>
 
 
@@ -107,19 +105,16 @@
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
             <scope>compile</scope>
-            <version>${version-org.infinispan}</version>
         </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-commons</artifactId>
             <scope>compile</scope>
-            <version>${version-org.infinispan}</version>
         </dependency>
         <dependency>
             <groupId>org.jgroups</groupId>
             <artifactId>jgroups</artifactId>
             <scope>compile</scope>
-            <version>${version-org.jgroups-jgroups}</version>
         </dependency>
 
         <!-- Testing -->
@@ -176,7 +171,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${version-org.apache.maven-compiler-plugin}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -195,7 +189,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${version-org.apache.maven-surefire-plugin}</version>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -223,7 +216,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${version-org.apache.maven-dependency-plugin}</version>
                         <executions>
                             <execution>
                                 <id>unpack</id>
@@ -249,27 +241,12 @@
                     <plugin>
                         <groupId>org.wildfly.plugins</groupId>
                         <artifactId>wildfly-maven-plugin</artifactId>
-                        <version>2.0.2.Final</version>
                         <executions>
-                            <execution>
-                                <id>add-logger</id>
-                                <phase>process-test-classes</phase>
-                                <goals>
-                                    <goal>add-resource</goal>
-                                </goals>
-                                <configuration>
-                                    <address>subsystem=logging,logger=net.fhirfactory.pegacorn</address>
-                                    <properties>
-                                        <level>name=DEBUG</level>
-                                    </properties>
-                                </configuration>
-                            </execution>
                         </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${version-org.apache.maven-surefire-plugin}</version>
                         <configuration>
                             <!-- Configuration for Arquillian: -->
                             <systemPropertyVariables>
