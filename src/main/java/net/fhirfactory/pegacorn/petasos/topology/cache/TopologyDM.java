@@ -117,6 +117,33 @@ public class TopologyDM {
         }
     }
 
+    public NodeElement getNode(String nodeName, NodeElementTypeEnum nodeType, String nodeVersion){
+        LOG.debug(".getNode(): Entry, nodeName (String) --> {}, nodeType (NodeElementTypeEnum) --> {}, nodeVersion (String) --> {}", nodeName, nodeType, nodeVersion);
+        if(nodeName == null || nodeType == null){
+            LOG.debug(".getNode(): Exit, either nodeName or nodeType are null");
+            return(null);
+        }
+        Collection<NodeElement> workingNodeSet = this.nodeSet.values();
+        for(NodeElement currentNode: workingNodeSet){
+            boolean isSameType = currentNode.getNodeArchetype() == nodeType;
+            boolean isSameVersion = false;
+            if( currentNode.getVersion() != null){
+                isSameVersion = currentNode.getVersion().contentEquals(nodeVersion);
+            }
+            if(isSameType && isSameVersion){
+                NodeElementIdentifier currentNodeID = currentNode.getIdentifier();
+                FDN nodeFDN = new FDN(currentNodeID);
+                String nodeElementUnqualifiedName = nodeFDN.getUnqualifiedRDN().getUnqualifiedName();
+                if(nodeElementUnqualifiedName.contentEquals(nodeName)){
+                    LOG.debug(".getNode(): Exit, returning found node (NodeElement) --> {}", currentNode);
+                    return(currentNode);
+                }
+            }
+        }
+        LOG.debug(".getNode(): Exit, could not find any node matching specify nodeName, nodeType");
+        return(null);
+    }
+
     public void removeNode(NodeElementIdentifier elementID) {
         LOG.debug(".removeNode(): Entry, elementID --> {}", elementID);
         if (elementID == null) {

@@ -200,7 +200,7 @@
     <profiles>
         <profile>
             <!-- An optional Arquillian testing profile -->
-            <id>arquillian-managed-wildfly</id>
+            <id>pegacorn-on-wildfly</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -250,7 +250,7 @@
                         <configuration>
                             <!-- Configuration for Arquillian: -->
                             <systemPropertyVariables>
-                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                               <!-- <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager> -->
                                 <JBOSS_HOME>${project.basedir}/target/wildfly-${version-org.wildfly}</JBOSS_HOME>
                                 <jboss.home>${project.basedir}/target/wildfly-${version-org.wildfly}</jboss.home>
                                 <module.path>${project.basedir}/target/wildfly-${version-org.wildfly}/modules</module.path>

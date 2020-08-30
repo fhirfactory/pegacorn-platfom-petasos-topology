@@ -84,6 +84,13 @@ public class TopologyIM {
         LOG.debug(".getNode(): Exit, retrievedNode --> {}", retrievedNode);
         return (retrievedNode);
     }
+
+    public NodeElement getNode(String nodeName, NodeElementTypeEnum nodeType, String nodeVersion){
+        LOG.debug(".getNode(): Entry, nodeName (String) --> {}, nodeType (NodeElementTypeEnum) --> {}, nodeVersion (String) --> {}", nodeName, nodeType, nodeVersion);
+        NodeElement retrievedNode = topologyDataManager.getNode(nodeName, nodeType, nodeVersion);
+        LOG.debug(".getNode(): Exit, retrievedNode (NodeElement) --> {}", retrievedNode);
+        return(retrievedNode);
+    }
     
     public NodeElement getNodeByKey(String nodeKey) {
         LOG.debug(".getNodeByKey(): Entry, nodeKey --> {}", nodeKey);
