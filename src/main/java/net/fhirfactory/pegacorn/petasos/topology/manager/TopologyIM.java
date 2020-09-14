@@ -62,7 +62,7 @@ public class TopologyIM {
         NodeElement containingElement = getNode(nodeID);
         if (containingElement != null) {
             LOG.trace(".addContainedNodeToNode(): Containing Node exists, so add contained node!");
-            containingElement.addContainedElement(containedNode.getIdentifier());
+            containingElement.addContainedElement(containedNode.getNodeInstanceID());
         } else {
             LOG.trace(".addContainedNodeToNode(): Containing Node doesn't exist, so the containedNode is actually the Top node!");
         }
@@ -163,40 +163,37 @@ public class TopologyIM {
 
     public ConcurrencyModeEnum getConcurrencyMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getConcurrencyMode(): Entry, nodeID --> {}", nodeID);
-        Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
-        if (nodeHierarchy.isEmpty()) {
-            LOG.debug(".getConcurrencyMode(): Exit, node hierarchy is empty - returning default mode");
-            return (ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
+        NodeElement node = topologyDataManager.getNode(nodeID);
+        if(node == null){
+            LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
+            return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE );
         }
-        int hierarchyHeight = nodeHierarchy.size();
-        for (int counter = 0; counter < hierarchyHeight; counter++) {
-            NodeElement currentElement = nodeHierarchy.get(counter);
-            if (currentElement.getConcurrencyMode() != null) {
-                LOG.debug(".getConcurrencyMode(): Exit, Found mode in hierarchy --> {}", currentElement.getConcurrencyMode());
-                return (currentElement.getConcurrencyMode());
-            }
+        if(node.getConcurrencyMode()== null){
+            return(ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE );
         }
-        LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return (ConcurrencyModeEnum.CONCURRENCY_MODE_STANDALONE);
+        LOG.debug(".getConcurrencyMode(): Found Node and it has a ConcurrenceMode parameter, returing");
+        return (node.getConcurrencyMode());
     }
 
     public ResilienceModeEnum getDeploymentResilienceMode(NodeElementIdentifier nodeID) {
         LOG.debug(".getDeploymentResilienceMode(): Entry, nodeID --> {}", nodeID);
-        Map<Integer, NodeElement> nodeHierarchy = topologyDataManager.getNodeContainmentHierarchy(nodeID);
-        if (nodeHierarchy.isEmpty()) {
-            LOG.debug(".getDeploymentResilienceMode(): Exit, node hierarchy is empty - returning default mode");
-            return (ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
+        NodeElement node = topologyDataManager.getNode(nodeID);
+        if(node == null){
+            LOG.debug(".getDeploymentResilienceMode(): Exit, couldn't find anything - so returning default");
+            return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
         }
-        int hierarchyHeight = nodeHierarchy.size();
-        for (int counter = 0; counter < hierarchyHeight; counter++) {
-            NodeElement currentElement = nodeHierarchy.get(counter);
-            if (currentElement.getResilienceMode() != null) {
-                LOG.debug(".getDeploymentResilienceMode(): Exit, Found mode in hierarchy --> {}", currentElement.getResilienceMode());
-                return (currentElement.getResilienceMode());
-            }
+        if(node.getResilienceMode() == null){
+            return(ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
         }
-        LOG.debug(".getConcurrencyMode(): Exit, couldn't find anything - so returning default");
-        return (ResilienceModeEnum.RESILIENCE_MODE_STANDALONE);
+        LOG.debug(".getDeploymentResilienceMode(): Found Node and it has a ResilienceMode parameter, returing");
+        return (node.getResilienceMode());
+    }
+
+    public EndpointElement getEndpoint(NodeElement node, String endpointName, String endpointVersion){
+        LOG.debug(".getEndpoint(): Entry");
+        EndpointElement extractedEndpoint = topologyDataManager.getEndpoint(node, endpointName, endpointVersion);
+        LOG.debug(".getEndpoint(): Exit");
+        return(extractedEndpoint);
     }
 
 }

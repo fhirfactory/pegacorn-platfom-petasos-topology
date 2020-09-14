@@ -17,3 +17,13 @@
 .settings/org.eclipse.wst.validation.prefs
 build.output
 pegacorn-platform-petasos-topology.iml
+pegacorn-platform-petasos-topology.iml
+build.output
+.settings/org.eclipse.wst.validation.prefs
+.settings/org.eclipse.wst.common.project.facet.core.xml
+.settings/org.eclipse.wst.common.component
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.core.resources.prefs
+.project
+.classpath
+*.iml

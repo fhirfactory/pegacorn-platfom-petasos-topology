@@ -89,7 +89,7 @@ public class TopologyDM {
         if (newElement == null) {
             throw (new IllegalArgumentException(".addNode(): newElement is null"));
         }
-        if (newElement.getIdentifier() == null) {
+        if (newElement.getNodeInstanceID() == null) {
             throw (new IllegalArgumentException(".addNode(): bad elementID within newElement"));
         }
         boolean elementFound = false;
@@ -107,13 +107,13 @@ public class TopologyDM {
             }
         }
         if (elementFound) {
-        	String nodeKey = currentNodeID.toString() +"."+newElement.getVersion();
+        	String nodeKey = currentNodeID.toTag() +"." + newElement.getVersion();
             this.nodeSet.put(currentNodeID, newElement);
             this.nodeKeySet.replace(nodeKey, currentNodeID);
         } else {
-        	String nodeKey = newElement.getIdentifier().toString() + "."+newElement.getVersion();
-            this.nodeSet.put(newElement.getIdentifier(), newElement);
-            this.nodeKeySet.put(nodeKey, newElement.getIdentifier());
+        	String nodeKey = newElement.getNodeInstanceID().toTag() + "."+newElement.getVersion();
+            this.nodeSet.put(newElement.getNodeInstanceID(), newElement);
+            this.nodeKeySet.put(nodeKey, newElement.getNodeInstanceID());
         }
     }
 
@@ -131,9 +131,9 @@ public class TopologyDM {
                 isSameVersion = currentNode.getVersion().contentEquals(nodeVersion);
             }
             if(isSameType && isSameVersion){
-                NodeElementIdentifier currentNodeID = currentNode.getIdentifier();
+                NodeElementIdentifier currentNodeID = currentNode.getNodeInstanceID();
                 FDN nodeFDN = new FDN(currentNodeID);
-                String nodeElementUnqualifiedName = nodeFDN.getUnqualifiedRDN().getUnqualifiedName();
+                String nodeElementUnqualifiedName = nodeFDN.getUnqualifiedRDN().getUnqualifiedValue();
                 if(nodeElementUnqualifiedName.contentEquals(nodeName)){
                     LOG.debug(".getNode(): Exit, returning found node (NodeElement) --> {}", currentNode);
                     return(currentNode);
@@ -426,7 +426,7 @@ public class TopologyDM {
         	NodeElementIdentifier currentElementId = elementIDEnumerator.nextElement();
             FDN currentElementFDN = new FDN(currentElementId);
             RDN currentElementUnqualifiedRDN = currentElementFDN.getUnqualifiedRDN();
-            String currentElementRDNValue = currentElementUnqualifiedRDN.getNameValue();
+            String currentElementRDNValue = currentElementUnqualifiedRDN.getValue();
             if (currentElementRDNValue.contentEquals(unqualifiedRDNName)) {
             	NodeElementIdentifier nodeInstance = new NodeElementIdentifier(currentElementId);
                 matchingSet.put(entryCount, nodeInstance);
@@ -443,7 +443,7 @@ public class TopologyDM {
             NodeElementIdentifier currentElementId = elementIDEnumerator.nextElement();
             FDN currentElementFDN = new FDN(currentElementId);
             RDN currentElementUnqualifiedRDN = currentElementFDN.getUnqualifiedRDN();
-            if (currentElementUnqualifiedRDN.getNameQualifier().contentEquals(NodeElementTypeEnum.SOLUTION.getNodeElementType())) {
+            if (currentElementUnqualifiedRDN.getQualifier().contentEquals(NodeElementTypeEnum.SOLUTION.getNodeElementType())) {
                 return (currentElementId);
             }
         }
@@ -477,5 +477,29 @@ public class TopologyDM {
             LOG.debug(".getNodeContainmentHierarchy(): Exit, retrieved Heirarchy, depth --> {}", nodeHierarchy.size());
         }
         return (nodeHierarchy);
+    }
+
+    public EndpointElement getEndpoint(NodeElement node, String endpointName, String endpointVersion){
+        LOG.debug(".getEndpoint(): Entry, node --> {}, endpointName --> {}, endpointVersion --> {}", node,endpointName, endpointVersion );
+        Set<EndpointElementIdentifier> endpoints = node.getEndpoints();
+        LOG.trace(".getEndpoint(): Number of Endpoints on the Node --> {}", endpoints.size());
+        for(EndpointElementIdentifier endpointId: endpoints){
+            LOG.trace(".getEndpoint(): Retrieving the endpoint from the cache");
+            EndpointElement endpointNode = this.endpointSet.get(endpointId);
+            LOG.trace(".getEndpoint(): Retrieved endpoint --> {}", endpointNode);
+            FDN endpointFDN = new FDN(endpointId);
+            String name = endpointFDN.getUnqualifiedRDN().getValue();
+            LOG.trace(".getEndpoint(): unqualified name of endpoint --> {}", name);
+            boolean namesMatch = name.contentEquals(endpointName);
+            LOG.trace(".getEndpoint(): namesMatch status --> {}", namesMatch);
+            boolean versionsMatch = endpointNode.getVersion().contentEquals(endpointVersion);
+            LOG.trace(".getEndpoint(): versionsMatch status --> {}", versionsMatch);
+            if( namesMatch && versionsMatch ){
+                LOG.debug(".getEndpoint(): Endpoint Found --> {}", endpointNode);
+                return(endpointNode);
+            }
+        }
+        LOG.debug(".getEndpoint(): no endpoints found!");
+        return(null);
     }
 }
