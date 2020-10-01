@@ -83,6 +83,7 @@
             <scope>compile</scope>
         </dependency>
         <!-- Pegacorn Customised Resources -->
+<!--
         <dependency>
             <groupId>net.fhirfactory.pegacorn</groupId>
             <artifactId>pegacorn-fhir-r4-model</artifactId>
@@ -90,6 +91,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+-->		
         <!-- Pegacorn Petasos Information Model -->
         <dependency>
             <groupId>net.fhirfactory.pegacorn</groupId>
