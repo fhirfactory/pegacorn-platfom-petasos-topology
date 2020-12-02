@@ -490,9 +490,9 @@ public class TopologyDM {
             FDN endpointFDN = new FDN(endpointId);
             String name = endpointFDN.getUnqualifiedRDN().getValue();
             LOG.trace(".getEndpoint(): unqualified name of endpoint --> {}", name);
-            boolean namesMatch = name.contentEquals(endpointName);
+            boolean namesMatch = stringValuesMatch(name, endpointName);
             LOG.trace(".getEndpoint(): namesMatch status --> {}", namesMatch);
-            boolean versionsMatch = endpointNode.getVersion().contentEquals(endpointVersion);
+            boolean versionsMatch = stringValuesMatch(endpointNode.getVersion(), endpointVersion);
             LOG.trace(".getEndpoint(): versionsMatch status --> {}", versionsMatch);
             if( namesMatch && versionsMatch ){
                 LOG.debug(".getEndpoint(): Endpoint Found --> {}", endpointNode);
@@ -502,4 +502,16 @@ public class TopologyDM {
         LOG.debug(".getEndpoint(): no endpoints found!");
         return(null);
     }
+
+    private boolean stringValuesMatch(String stringA, String stringB){
+        if(stringA == null && stringB == null){
+            return(true);
+        }
+        if(stringA == null || stringB == null){
+            return(false);
+        }
+        boolean stringsAreEqual = stringA.contentEquals(stringB);
+        return(stringsAreEqual);
+    }
+
 }
